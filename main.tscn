@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bjgxuq2d3kr01"]
+[gd_scene load_steps=9 format=3 uid="uid://bjgxuq2d3kr01"]
 
 [ext_resource type="Script" path="res://Camera3D.cs" id="1_3rfyu"]
 [ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://car_test.tscn" id="1_inwan"]
@@ -14,6 +14,12 @@ uv1_scale = Vector3(100, 100, 100)
 [sub_resource type="BoxShape3D" id="BoxShape3D_gplow"]
 size = Vector3(100, 10, 100)
 
+[sub_resource type="PrismMesh" id="PrismMesh_2m83u"]
+size = Vector3(6, 1.5, 6)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fff3f"]
+points = PackedVector3Array(-3, -0.75, -3, -3, -0.75, 3, 0, 0.75, -3, 3, -0.75, -3, 3, -0.75, 3, 0, 0.75, 3)
+
 [node name="Main" type="Node3D"]
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("ObjectToFollow")]
@@ -26,7 +32,8 @@ transform = Transform3D(1, 0, 0, 0, 0.890737, 0.454519, 0, -0.454519, 0.890737, 
 shadow_enabled = true
 
 [node name="CarTest" parent="." instance=ExtResource("1_inwan")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(0.999988, -0.00455151, -0.0019583, 0.00454413, 0.999983, -0.00375339, 0.00197536, 0.00374445, 0.999991, 0, 2.242, 0)
+MaxTorque = 100.0
 
 [node name="Sol" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0673704, -4.09394, -0.0795365)
@@ -39,3 +46,14 @@ surface_material_override/0 = SubResource("StandardMaterial3D_62dcj")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Sol"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
 shape = SubResource("BoxShape3D_gplow")
+
+[node name="Jump" type="StaticBody3D" parent="."]
+transform = Transform3D(0.999988, -0.00455151, -0.0019583, 0.00454413, 0.999983, -0.00375339, 0.00197536, 0.00374445, 0.999991, 0, 2.242, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Jump"]
+transform = Transform3D(-0.595925, 0.0102661, 0.802974, 0.00423808, 0.999944, -0.00963915, -0.803027, -0.00234114, -0.595936, 0.0186589, -0.598813, 10.9198)
+mesh = SubResource("PrismMesh_2m83u")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Jump"]
+transform = Transform3D(-0.595925, 0.0102661, 0.802974, 0.00423808, 0.999944, -0.00963915, -0.803027, -0.00234114, -0.595936, 0.0186589, -0.598813, 10.9198)
+shape = SubResource("ConvexPolygonShape3D_fff3f")

@@ -22,20 +22,34 @@ public partial class CarTest : RigidBody3D
 
     private bool OnRoad => _wheelsOnRoad == 4;
     private Dictionary<RayCast3D, MeshInstance3D> _wheels = new();
+    private RayCast3D _frontRayCast;
+    private RayCast3D _backRayCast;
     private int _wheelsOnRoad = 0;
 
     public override void _Ready()
 	{
-        new List<string>(){ "BackLeft", "BackRight", "FrontLeft", "FrontRight"}
+        new List<string>() { "BackLeft", "BackRight", "FrontLeft", "FrontRight" }
             .ForEach(str => _wheels.Add(
-                (RayCast3D)GetNode(str + "RayCast"), 
+                (RayCast3D)GetNode(str + "RayCast"),
                 (MeshInstance3D)GetNode("Wheels/" + str + "Wheel")));
+
+        _frontRayCast = (RayCast3D)GetNode("FrontRayCast");
+        _backRayCast = (RayCast3D)GetNode("BackRayCast");
+
+        previousPosition = this.GlobalPosition;
+        speed = 0;
     }
 
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
+    Vector3 previousPosition;
+    double speed;
     public override void _Process(double delta)
 	{
-	}
+        var currentPosition = this.GlobalPosition;
+        speed = currentPosition.DistanceTo(previousPosition) / delta;
+        GD.Print("Speed : " + speed);
+        previousPosition = currentPosition;
+
+    }
 
     public override void _PhysicsProcess(double delta)
     {
@@ -53,15 +67,16 @@ public partial class CarTest : RigidBody3D
         _wheelsOnRoad = 0;
         foreach(var w in _wheels) HandleSuspension(w.Key, w.Value);
 
-        LinearDamp = OnRoad ? LinearMaxDamp : 0;
-        if (_wheelsOnRoad < 2) return;
+        Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp : Math.Max(0f, LinearDamp - (float)delta * 20f);
+        AngularDamp = _wheelsOnRoad > 0 ? 15f : Math.Max(0f, AngularDamp - (float)delta * 60f);
+        GD.Print(LinearDamp);
+        if (_wheelsOnRoad == 0) return;
 
         //Throttle
-        Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
         float forwardDirection = Math.Abs(inputDirection.Y) > DeadZone ?
             Math.Abs(inputDirection.Y) / inputDirection.Y * 1f : 0f;
-        Vector3 forwardVector = Transform.Basis.X.Normalized();
-        forwardVector.Y = 0f;
+        Vector3 forwardVector = GetForwardVector().Normalized();
         ApplyCentralForce(forwardVector * MaxTorque * forwardDirection);
         CenterOfMass = new Vector3(-forwardDirection * TiltRatio, CenterOfMass.Y, CenterOfMass.Z);
 
@@ -70,11 +85,13 @@ public partial class CarTest : RigidBody3D
         float sideDirection = Math.Abs(inputDirection.X) > DeadZone ?
             Math.Abs(inputDirection.X) / inputDirection.X * 1f : 0f;
         ApplyTorque(new Vector3(0f, -sideDirection, 0f) * angle90Rad * MaxTurningForce);
+        CenterOfMass = new Vector3(CenterOfMass.X, CenterOfMass.Y, sideDirection * TiltRatio / 2f);
     }
 
     private void HandleSuspension(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh)
     {
-        Vector3 wheelMaxPosition = GetWheelPosition(SuspensionLength, suspensionRayCast, wheelMesh);
+        float wheelRadius = ((CylinderMesh)wheelMesh.Mesh).TopRadius;
+        Vector3 wheelMaxPosition = suspensionRayCast.Position - (suspensionRayCast.Basis.Y.Normalized() * (SuspensionLength - wheelRadius));
         if (!suspensionRayCast.IsColliding())
         {
             wheelMesh.Position = wheelMaxPosition;
@@ -90,15 +107,28 @@ public partial class CarTest : RigidBody3D
         }
 
         float forceRatio = 1f - (distance / SuspensionLength);
+        //speed = 0;
         Vector3 direction = collisionPoint.DirectionTo(suspensionRayCast.GlobalPosition).Normalized();
-        ApplyForce(direction * forceRatio * SuspensionForce, suspensionRayCast.GlobalPosition - GlobalPosition);
-        wheelMesh.Position = GetWheelPosition(distance, suspensionRayCast, wheelMesh);
+        ApplyForce(direction * forceRatio * SuspensionForce * Math.Max(1f, (float)speed/5f), suspensionRayCast.GlobalPosition - GlobalPosition);
+        wheelMesh.GlobalPosition = GetWheelPosition(distance, suspensionRayCast, wheelMesh);
         _wheelsOnRoad++;
     }
 
     private Vector3 GetWheelPosition(float suspensionLength, RayCast3D suspensionRayCast, MeshInstance3D wheelMesh)
     {
         float wheelRadius = ((CylinderMesh)wheelMesh.Mesh).TopRadius;
-        return suspensionRayCast.Position - (suspensionRayCast.Basis.Y.Normalized() * (suspensionLength - wheelRadius));
+        var v = suspensionRayCast.GlobalPosition - (suspensionRayCast.Basis.Y.Normalized() * (suspensionLength - wheelRadius));
+        
+        var c = suspensionRayCast.GetCollisionPoint();
+        //var d = c.DirectionTo(suspensionRayCast.GlobalPosition).Normalized();
+        v.Y = c.Y + wheelRadius;
+        return v;
+    }
+
+    private Vector3 GetForwardVector()
+    {
+        if (!_frontRayCast.IsColliding() && !_backRayCast.IsColliding()) 
+            return Transform.Basis.X;
+        return _backRayCast.GetCollisionPoint().DirectionTo(_frontRayCast.GetCollisionPoint());
     }
 }
