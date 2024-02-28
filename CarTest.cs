@@ -68,8 +68,8 @@ public partial class CarTest : RigidBody3D
         foreach(var w in _wheels) HandleSuspension(w.Key, w.Value);
 
         Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp : Math.Max(0f, LinearDamp - (float)delta * 20f);
-        AngularDamp = _wheelsOnRoad > 0 ? 15f : Math.Max(0f, AngularDamp - (float)delta * 60f);
+        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp : Math.Max(0f, LinearDamp - (float)delta * 10f);
+        AngularDamp = _wheelsOnRoad > 0 ? 15f : Math.Max(0f, AngularDamp - (float)delta * 50f);
         GD.Print(LinearDamp);
         if (_wheelsOnRoad == 0) return;
 
