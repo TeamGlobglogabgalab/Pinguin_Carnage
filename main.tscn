@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://bjgxuq2d3kr01"]
+
+[ext_resource type="Script" path="res://Camera3D.cs" id="1_3rfyu"]
+[ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://car_test.tscn" id="1_inwan"]
+[ext_resource type="Texture2D" uid="uid://b7jciqiigpkcu" path="res://Textures/grid_white_512x512.png" id="3_nrvg4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_plmjx"]
+size = Vector3(100, 10, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_62dcj"]
+albedo_texture = ExtResource("3_nrvg4")
+uv1_scale = Vector3(100, 100, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gplow"]
+size = Vector3(100, 10, 100)
+
+[node name="Main" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("ObjectToFollow")]
+transform = Transform3D(-1.4775e-08, -0.406497, 0.913652, -1.93468e-09, 0.913652, 0.406497, -1, 4.23839e-09, -1.42857e-08, 3.48463, 3.18283, 0.0858268)
+script = ExtResource("1_3rfyu")
+ObjectToFollow = NodePath("../CarTest")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.890737, 0.454519, 0, -0.454519, 0.890737, 0, 6.59752, 9.68988)
+shadow_enabled = true
+
+[node name="CarTest" parent="." instance=ExtResource("1_inwan")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="Sol" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0673704, -4.09394, -0.0795365)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Sol"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
+mesh = SubResource("BoxMesh_plmjx")
+surface_material_override/0 = SubResource("StandardMaterial3D_62dcj")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Sol"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
+shape = SubResource("BoxShape3D_gplow")
