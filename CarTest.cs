@@ -20,11 +20,14 @@ public partial class CarTest : RigidBody3D
     [Export]
     public float MaxTurningForce = 30f;
 
+    public double CarSpeed;
+
     private bool OnRoad => _wheelsOnRoad == 4;
     private Dictionary<RayCast3D, MeshInstance3D> _wheels = new();
     private RayCast3D _frontRayCast;
     private RayCast3D _backRayCast;
     private int _wheelsOnRoad = 0;
+    private Vector3 _previousPosition;
 
     public override void _Ready()
 	{
@@ -36,19 +39,12 @@ public partial class CarTest : RigidBody3D
         _frontRayCast = (RayCast3D)GetNode("FrontRayCast");
         _backRayCast = (RayCast3D)GetNode("BackRayCast");
 
-        previousPosition = this.GlobalPosition;
-        speed = 0;
+        _previousPosition = this.GlobalPosition;
+        CarSpeed = 0;
     }
 
-    Vector3 previousPosition;
-    double speed;
     public override void _Process(double delta)
 	{
-        var currentPosition = this.GlobalPosition;
-        speed = currentPosition.DistanceTo(previousPosition) / delta;
-        GD.Print("Speed : " + speed);
-        previousPosition = currentPosition;
-
     }
 
     public override void _PhysicsProcess(double delta)
@@ -67,10 +63,13 @@ public partial class CarTest : RigidBody3D
         _wheelsOnRoad = 0;
         foreach(var w in _wheels) HandleSuspension(w.Key, w.Value);
 
+        var currentPosition = this.GlobalPosition;
+        CarSpeed = _wheelsOnRoad == 0 ? 0 : currentPosition.DistanceTo(_previousPosition) / delta;
+        _previousPosition = currentPosition;
+
         Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp : Math.Max(0f, LinearDamp - (float)delta * 10f);
-        AngularDamp = _wheelsOnRoad > 0 ? 15f : Math.Max(0f, AngularDamp - (float)delta * 50f);
-        GD.Print(LinearDamp);
+        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp * Math.Max(1f, (float)CarSpeed / 10f) : 0f; // Math.Max(0f, LinearDamp - (float)delta * 10f);
+        AngularDamp = _wheelsOnRoad > 0 ? 10f : 1f;
         if (_wheelsOnRoad == 0) return;
 
         //Throttle
@@ -109,7 +108,7 @@ public partial class CarTest : RigidBody3D
         float forceRatio = 1f - (distance / SuspensionLength);
         //speed = 0;
         Vector3 direction = collisionPoint.DirectionTo(suspensionRayCast.GlobalPosition).Normalized();
-        ApplyForce(direction * forceRatio * SuspensionForce * Math.Max(1f, (float)speed/5f), suspensionRayCast.GlobalPosition - GlobalPosition);
+        ApplyForce(direction * forceRatio * SuspensionForce * Math.Max(1f, (float)CarSpeed / 5f), suspensionRayCast.GlobalPosition - GlobalPosition);
         wheelMesh.GlobalPosition = GetWheelPosition(distance, suspensionRayCast, wheelMesh);
         _wheelsOnRoad++;
     }
