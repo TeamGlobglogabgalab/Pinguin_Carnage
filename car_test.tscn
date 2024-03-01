@@ -21,14 +21,14 @@ transform = Transform3D(0.999988, -0.00455151, -0.0019583, 0.00454413, 0.999983,
 mass = 5.0
 gravity_scale = 3.0
 center_of_mass_mode = 1
-center_of_mass = Vector3(0, -0.05, 0)
+center_of_mass = Vector3(0, -0.2, 0)
 angular_damp = 15.0
 script = ExtResource("1_xwvox")
 SuspensionLength = 0.6
-SuspensionForce = 200.0
+SuspensionForce = 180.0
 LinearMaxDamp = 2.0
-TiltRatio = 0.4
-MaxTorque = 500.0
+TiltRatio = 0.2
+MaxTorque = 360.0
 MaxTurningForce = 66.0
 
 [node name="Rectangle3D" type="MeshInstance3D" parent="."]
@@ -74,8 +74,8 @@ transform = Transform3D(0.999997, 2.50111e-11, 0, 3.81988e-11, 0.999999, -4.6566
 
 [node name="FrontRayCast" type="RayCast3D" parent="."]
 transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0.8, 0, 0)
-target_position = Vector3(0, -2, 0)
+target_position = Vector3(0, -20, 0)
 
 [node name="BackRayCast" type="RayCast3D" parent="."]
 transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, -0.8, 0, 0)
-target_position = Vector3(0, -2, 0)
+target_position = Vector3(0, -20, 0)
