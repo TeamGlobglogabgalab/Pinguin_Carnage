@@ -26,6 +26,7 @@ center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 angular_damp = 15.0
 script = ExtResource("1_xwvox")
+Acceleration = 5.0
 
 [node name="Rectangle3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")

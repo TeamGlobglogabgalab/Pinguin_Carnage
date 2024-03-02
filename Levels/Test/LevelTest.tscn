@@ -1,9 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://bjgxuq2d3kr01"]
+[gd_scene load_steps=19 format=3 uid="uid://bjgxuq2d3kr01"]
 
 [ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://Prefabs/Car/Test/CarTest.tscn" id="1_inwan"]
 [ext_resource type="Script" path="res://Levels/Test/LevelTest.cs" id="1_kwxwf"]
 [ext_resource type="PackedScene" uid="uid://l5hfju0i486p" path="res://Prefabs/Camera/CameraGTA/CameraGTA.tscn" id="2_wcwql"]
 [ext_resource type="Texture2D" uid="uid://b7jciqiigpkcu" path="res://Textures/grid_white_512x512.png" id="3_nrvg4"]
+[ext_resource type="Texture2D" uid="uid://btsitu6jtv8n3" path="res://Textures/checker_red_512x512.png" id="5_rbomw"]
+[ext_resource type="Texture2D" uid="uid://bp4p3sf02rbbk" path="res://Textures/checker_blue_512x512.png" id="6_g7bjo"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_plmjx"]
 size = Vector3(100, 10, 100)
@@ -18,8 +20,29 @@ size = Vector3(100, 10, 100)
 [sub_resource type="PrismMesh" id="PrismMesh_2m83u"]
 size = Vector3(6, 1.5, 6)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fff3f"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oaiyk"]
+albedo_texture = ExtResource("5_rbomw")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_eeix4"]
 points = PackedVector3Array(-3, -0.75, -3, -3, -0.75, 3, 0, 0.75, -3, 3, -0.75, -3, 3, -0.75, 3, 0, 0.75, 3)
+
+[sub_resource type="PrismMesh" id="PrismMesh_2mj3a"]
+size = Vector3(60, 8, 200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_frwtx"]
+albedo_texture = ExtResource("6_g7bjo")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_kgxqq"]
+points = PackedVector3Array(30, -4, 100, -1.90735e-06, 4, 100, -30, -4, 100, 30, -4, -100, -1.90735e-06, 4, -100, -30, -4, -100)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_1lrif"]
+points = PackedVector3Array(30, -4, 100, -1.90735e-06, 4, 100, -30, -4, 100, 30, -4, -100, -1.90735e-06, 4, -100, -30, -4, -100)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_xgt70"]
+points = PackedVector3Array(30, -4, 100, -1.90735e-06, 4, 100, -30, -4, 100, 30, -4, -100, -1.90735e-06, 4, -100, -30, -4, -100)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_jrnox"]
+points = PackedVector3Array(30, -4, 100, -1.90735e-06, 4, 100, -30, -4, 100, 30, -4, -100, -1.90735e-06, 4, -100, -30, -4, -100)
 
 [node name="LevelTest" type="Node3D"]
 script = ExtResource("1_kwxwf")
@@ -53,10 +76,59 @@ transform = Transform3D(0.999988, -0.00455151, -0.0019583, 0.00454413, 0.999983,
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Jump"]
 transform = Transform3D(-0.595925, 0.0102661, 0.802974, 0.00423808, 0.999944, -0.00963915, -0.803027, -0.00234114, -0.595936, 0.0186589, -0.598813, 10.9198)
 mesh = SubResource("PrismMesh_2m83u")
+surface_material_override/0 = SubResource("StandardMaterial3D_oaiyk")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Jump"]
 transform = Transform3D(-0.595925, 0.0102661, 0.802974, 0.00423808, 0.999944, -0.00963915, -0.803027, -0.00234114, -0.595936, 0.0186589, -0.598813, 10.9198)
-shape = SubResource("ConvexPolygonShape3D_fff3f")
+shape = SubResource("ConvexPolygonShape3D_eeix4")
+
+[node name="Slop1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -69.1829, 4.52257, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Slop1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.4906, -0.228055, 0)
+mesh = SubResource("PrismMesh_2mj3a")
+surface_material_override/0 = SubResource("StandardMaterial3D_frwtx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Slop1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.4906, -0.228055, 0)
+shape = SubResource("ConvexPolygonShape3D_kgxqq")
+
+[node name="Slop2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.1927, 4.52257, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Slop2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.4906, -0.228055, 0)
+mesh = SubResource("PrismMesh_2mj3a")
+surface_material_override/0 = SubResource("StandardMaterial3D_frwtx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Slop2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.4906, -0.228055, 0)
+shape = SubResource("ConvexPolygonShape3D_1lrif")
+
+[node name="Slop3" type="StaticBody3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 10.8872, 4.52257, -88.845)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Slop3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5763, -0.228055, -12.9583)
+mesh = SubResource("PrismMesh_2mj3a")
+surface_material_override/0 = SubResource("StandardMaterial3D_frwtx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Slop3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5763, -0.228055, -12.9583)
+shape = SubResource("ConvexPolygonShape3D_xgt70")
+
+[node name="Slop4" type="StaticBody3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 10.8872, 4.52257, 65.5486)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Slop4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5763, -0.228055, -12.9583)
+mesh = SubResource("PrismMesh_2mj3a")
+surface_material_override/0 = SubResource("StandardMaterial3D_frwtx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Slop4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5763, -0.228055, -12.9583)
+shape = SubResource("ConvexPolygonShape3D_jrnox")
 
 [node name="Label" type="Label" parent="."]
 offset_left = 14.0

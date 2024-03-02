@@ -14,11 +14,13 @@ public partial class CarTest : RigidBody3D
     [Export]
     public float SuspensionForce = 180f;
     [Export]
-    public float LinearMaxDamp = 2f;
+    public float LinearBaseDamp = 2f;
     [Export]
     public float TiltRatio = 0.2f;
     [Export]
     public float MaxTorque = 360f;
+    [Export]
+    public float Acceleration = 50f;
     [Export]
     public float TurningForceBase = 30f;
     [Export]
@@ -37,6 +39,7 @@ public partial class CarTest : RigidBody3D
     private RayCast3D _backRayCast;
     private RayCast3D _leftSideRayCast;
     private RayCast3D _rightSideRayCast;
+    private float _currentTorque = 0;
     private int _wheelsOnRoad = 0;
     private Vector3 _initialPosition;
 
@@ -67,8 +70,16 @@ public partial class CarTest : RigidBody3D
         }
 
         //Space key
-        IsDrifting = Input.IsActionPressed("cmd_drift") && ForwardSpeed > 5;
+        Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+        IsDrifting = Input.IsActionPressed("cmd_drift") && Math.Abs(inputDirection.X) > DeadZone;
+
+        //Throttle - Torque
+        float forwardDirection = Math.Abs(inputDirection.Y) > DeadZone ?
+            Math.Abs(inputDirection.Y) / inputDirection.Y * 1f : 0f;
+        _currentTorque = Mathf.Lerp(_currentTorque, MaxTorque * forwardDirection, Acceleration * (float)delta);
     }
+
+    public float friction;
 
     public override void _PhysicsProcess(double delta)
     {
@@ -89,7 +100,9 @@ public partial class CarTest : RigidBody3D
 
         //Damp
         Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp * Math.Max(1f, ForwardSpeed / 10f) : 0f;
+        LinearDamp = _wheelsOnRoad > 0 ? 
+            (Math.Abs(inputDirection.Y) < DeadZone && ForwardSpeed < 3f && !IsDrifting ? 10f : LinearBaseDamp * Math.Max(1f, ForwardSpeed / 10f)) : 
+            Mathf.Lerp(LinearDamp, 0f, (float)delta * 20f);
         AngularDamp = _wheelsOnRoad > 0 ? 10f : 1f;
         if (_wheelsOnRoad == 0) return;
 
@@ -100,14 +113,15 @@ public partial class CarTest : RigidBody3D
         float forwardDirection = Math.Abs(inputDirection.Y) > DeadZone ?
             Math.Abs(inputDirection.Y) / inputDirection.Y * 1f : 0f;
         Vector3 forwardVector = GetForwardVector().Normalized();
-        ApplyCentralForce(forwardVector * MaxTorque * forwardDirection);
+        ApplyCentralForce(forwardVector * _currentTorque);
         //Front/Back tilt
         CenterOfMass = new Vector3(-forwardDirection * tilt, CenterOfMass.Y, CenterOfMass.Z);
 
         //Friction force
-        float friction = IsDrifting ? 0f : FrictionForce;
+        friction = FrictionForce;
         //Increase friction at lower speed to limit slow drift
-        friction = ForwardSpeed < 8f ? friction + (friction * (8f - ForwardSpeed)) : friction;
+        friction = ForwardSpeed >= 8f ? IsDrifting ? 0f : friction :
+            !IsDrifting ? friction + (friction * (8f - ForwardSpeed)) : friction * (8f - ForwardSpeed)/10f;
         ApplyCentralForce(GetSideVector() * -SideSpeed * Mass * friction);
 
         //Turning
