@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmuivykagycbr"]
+
+[ext_resource type="Script" path="res://Prefabs/Camera/CameraMouse/CameraMouse.cs" id="1_aq5u8"]
+
+[node name="CameraMouse" type="Camera3D"]
+script = ExtResource("1_aq5u8")

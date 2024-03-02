@@ -1,8 +1,8 @@
 [gd_scene load_steps=10 format=3 uid="uid://bjgxuq2d3kr01"]
 
-[ext_resource type="Script" path="res://Camera3D.cs" id="1_3rfyu"]
-[ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://car_test.tscn" id="1_inwan"]
-[ext_resource type="Script" path="res://Main.cs" id="1_kwxwf"]
+[ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://Prefabs/Car/Test/CarTest.tscn" id="1_inwan"]
+[ext_resource type="Script" path="res://Levels/Test/LevelTest.cs" id="1_kwxwf"]
+[ext_resource type="PackedScene" uid="uid://l5hfju0i486p" path="res://Prefabs/Camera/CameraGTA/CameraGTA.tscn" id="2_wcwql"]
 [ext_resource type="Texture2D" uid="uid://b7jciqiigpkcu" path="res://Textures/grid_white_512x512.png" id="3_nrvg4"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_plmjx"]
@@ -21,12 +21,10 @@ size = Vector3(6, 1.5, 6)
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fff3f"]
 points = PackedVector3Array(-3, -0.75, -3, -3, -0.75, 3, 0, 0.75, -3, 3, -0.75, -3, 3, -0.75, 3, 0, 0.75, 3)
 
-[node name="Main" type="Node3D"]
+[node name="LevelTest" type="Node3D"]
 script = ExtResource("1_kwxwf")
 
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("ObjectToFollow")]
-transform = Transform3D(-1.4775e-08, -0.406497, 0.913652, -1.93468e-09, 0.913652, 0.406497, -1, 4.23839e-09, -1.42857e-08, 3.48463, 3.18283, 0.0858268)
-script = ExtResource("1_3rfyu")
+[node name="CameraGTA" parent="." node_paths=PackedStringArray("ObjectToFollow") instance=ExtResource("2_wcwql")]
 ObjectToFollow = NodePath("../CarTest")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://dhdsw245ptfmd"]
 
-[ext_resource type="Script" path="res://CarTest.cs" id="1_xwvox"]
+[ext_resource type="Script" path="res://Prefabs/Car/Test/CarTest.cs" id="1_xwvox"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_kkump"]
 size = Vector3(2, 0.4, 1)

@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Camera3D : Godot.Camera3D
+public partial class CameraGTA : Godot.Camera3D
 {
 	[Export]
 	public Node3D ObjectToFollow;

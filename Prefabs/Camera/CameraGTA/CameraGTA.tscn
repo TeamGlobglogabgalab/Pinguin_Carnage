@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://l5hfju0i486p"]
+
+[ext_resource type="Script" path="res://Prefabs/Camera/CameraGTA/CameraGTA.cs" id="1_r2e8s"]
+
+[node name="CameraGTA" type="Camera3D"]
+transform = Transform3D(-1.4775e-08, -0.406497, 0.913652, -1.93468e-09, 0.913652, 0.406497, -1, 4.23839e-09, -1.42857e-08, 3.48463, 3.18283, 0.0858268)
+script = ExtResource("1_r2e8s")

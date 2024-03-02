@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Main : Node3D
+public partial class LevelTest : Node3D
 {
 	private CarTest _car;
 	private Label _labelSpeed;

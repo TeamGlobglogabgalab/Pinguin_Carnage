@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://bbqa36v4lxkct"]
+
+[ext_resource type="Texture2D" uid="uid://ddga2xusb7tft" path="res://Textures/grid_black_512x512.png" id="1_1yygj"]
+[ext_resource type="PackedScene" uid="uid://bmuivykagycbr" path="res://Prefabs/Camera/CameraMouse/CameraMouse.tscn" id="1_ibm1x"]
+[ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://Prefabs/Car/Test/CarTest.tscn" id="2_1q5wd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yh4qt"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hsqd1"]
+albedo_texture = ExtResource("1_1yygj")
+uv1_scale = Vector3(100, 100, 100)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hi54j"]
+material = SubResource("StandardMaterial3D_hsqd1")
+size = Vector3(100, 1, 100)
+
+[node name="Sandbox" type="Node3D"]
+
+[node name="CameraMouse" parent="." instance=ExtResource("1_ibm1x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3, 8)
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape3D_yh4qt")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_hi54j")
+
+[node name="CarTest" parent="." instance=ExtResource("2_1q5wd")]
+transform = Transform3D(0.999988, -0.00455151, -0.0019583, 0.00454413, 0.999983, -0.00375339, 0.00197536, 0.00374445, 0.999991, 0, 1, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.419737, 0.907646, 0, -0.907646, -0.419737, 0, 6.3165, 0)
+shadow_enabled = true
