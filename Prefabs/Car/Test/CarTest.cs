@@ -20,17 +20,25 @@ public partial class CarTest : RigidBody3D
     [Export]
     public float MaxTorque = 360f;
     [Export]
-    public float TurningForce = 66f;
+    public float TurningForceBase = 30f;
+    [Export]
+    public float TurningForceDrift = 90f;
+    [Export]
+    public float FrictionForce = 10f;
 
     public float ForwardSpeed => Math.Abs(LinearVelocity.Dot(Transform.Basis.X));
-    public float SideSpeed => LinearVelocity.Dot(Transform.Basis.Z);
+    public float SideSpeed => LinearVelocity.Dot(GetSideVector());
+    public bool IsDrifting { get; private set; }
 
     private bool OnRoad => _wheelsOnRoad == 4;
+
     private Dictionary<RayCast3D, MeshInstance3D> _wheels = new();
     private RayCast3D _frontRayCast;
     private RayCast3D _backRayCast;
+    private RayCast3D _leftSideRayCast;
+    private RayCast3D _rightSideRayCast;
     private int _wheelsOnRoad = 0;
-    private Vector3 _previousPosition;
+    private Vector3 _initialPosition;
 
     public override void _Ready()
     {
@@ -42,17 +50,30 @@ public partial class CarTest : RigidBody3D
         _frontRayCast = (RayCast3D)GetNode("FrontRayCast");
         _backRayCast = (RayCast3D)GetNode("BackRayCast");
 
-        _previousPosition = this.GlobalPosition;
+        _leftSideRayCast = (RayCast3D)GetNode("LeftSideRayCast");
+        _rightSideRayCast = (RayCast3D)GetNode("RightSideRayCast");
+
+        _initialPosition = this.GlobalPosition;
+        IsDrifting = false;
     }
 
     public override void _Process(double delta)
     {
+        if(Input.IsActionJustPressed("cmd_reset")) //R key
+        {
+            this.GlobalPosition = _initialPosition;
+            LinearVelocity = Vector3.Zero;
+            Rotation = Vector3.Zero;
+        }
+
+        //Space key
+        IsDrifting = Input.IsActionPressed("cmd_drift") && ForwardSpeed > 5;
     }
 
     public override void _PhysicsProcess(double delta)
     {
-        //DEBUG
-        if (Input.IsActionJustPressed("ui_accept"))
+        //DEBUG JUMP
+        /*if (Input.IsActionJustPressed("ui_accept"))
         {
             Random random = new Random();
             int randomNumber = random.Next(40) - 20;
@@ -60,36 +81,44 @@ public partial class CarTest : RigidBody3D
             ApplyForce(new Vector3(0, Mass * 666, 0));
             ApplyForce(new Vector3(0, Mass * 100, 0), GlobalPosition +
                 new Vector3((float)randomNumber / 20f, 0, (float)randomNumber2 / 20f));
-        }
+        }*/
 
         _wheelsOnRoad = 0;
         foreach (var w in _wheels) HandleSuspension(w.Key, w.Value);
         CenterOfMass = new Vector3(0f, CenterOfMass.Y, 0f);
 
+        //Damp
         Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp * Math.Max(1f, ForwardSpeed / 10f) : 0f; // Math.Max(0f, LinearDamp - (float)delta * 10f);
+        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp * Math.Max(1f, ForwardSpeed / 10f) : 0f;
         AngularDamp = _wheelsOnRoad > 0 ? 10f : 1f;
         if (_wheelsOnRoad == 0) return;
+
+        //Tilt adjustment
+        float tilt = ForwardSpeed < 8 ? TiltRatio * ForwardSpeed * 0.125f : TiltRatio;
 
         //Throttle
         float forwardDirection = Math.Abs(inputDirection.Y) > DeadZone ?
             Math.Abs(inputDirection.Y) / inputDirection.Y * 1f : 0f;
         Vector3 forwardVector = GetForwardVector().Normalized();
         ApplyCentralForce(forwardVector * MaxTorque * forwardDirection);
-        CenterOfMass = new Vector3(-forwardDirection * TiltRatio, CenterOfMass.Y, CenterOfMass.Z);
+        //Front/Back tilt
+        CenterOfMass = new Vector3(-forwardDirection * tilt, CenterOfMass.Y, CenterOfMass.Z);
 
         //Friction force
-        //if (Math.Abs(SideSpeed) < 5)
-        //    ApplyCentralForce(Transform.Basis.Z * -SideSpeed * Mass * 10);
+        float friction = IsDrifting ? 0f : FrictionForce;
+        //Increase friction at lower speed to limit slow drift
+        friction = ForwardSpeed < 8f ? friction + (friction * (8f - ForwardSpeed)) : friction;
+        ApplyCentralForce(GetSideVector() * -SideSpeed * Mass * friction);
 
         //Turning
-        if (ForwardSpeed < 1) return;
-        float turningForce = ForwardSpeed < 5 ? TurningForce * ForwardSpeed * 0.2f : TurningForce;
+        float turningForce = IsDrifting ? TurningForceDrift : TurningForceBase;
+        turningForce = ForwardSpeed < 8f ? turningForce * ForwardSpeed * 0.125f : turningForce;
         float angle90Rad = 1.5708f;
         float sideDirection = Math.Abs(inputDirection.X) > DeadZone ?
             Math.Abs(inputDirection.X) / inputDirection.X * 1f : 0f;
         ApplyTorque(new Vector3(0f, -sideDirection, 0f) * angle90Rad * turningForce);
-        CenterOfMass = new Vector3(CenterOfMass.X, CenterOfMass.Y, sideDirection * TiltRatio / 2f);
+        //Side tilt
+        CenterOfMass = new Vector3(CenterOfMass.X, CenterOfMass.Y, sideDirection * tilt / 2f);
     }
 
     private void HandleSuspension(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh)
@@ -133,5 +162,12 @@ public partial class CarTest : RigidBody3D
         if (!_frontRayCast.IsColliding() && !_backRayCast.IsColliding())
             return Transform.Basis.X;
         return _backRayCast.GetCollisionPoint().DirectionTo(_frontRayCast.GetCollisionPoint());
+    }
+
+    private Vector3 GetSideVector()
+    {
+        if (!_leftSideRayCast.IsColliding() && !_rightSideRayCast.IsColliding())
+            return Transform.Basis.Z;
+        return _leftSideRayCast.GetCollisionPoint().DirectionTo(_rightSideRayCast.GetCollisionPoint());
     }
 }

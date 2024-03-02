@@ -61,5 +61,5 @@ shape = SubResource("ConvexPolygonShape3D_fff3f")
 [node name="Label" type="Label" parent="."]
 offset_left = 14.0
 offset_top = 10.0
-offset_right = 135.0
-offset_bottom = 41.0
+offset_right = 233.0
+offset_bottom = 91.0

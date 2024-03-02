@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dhdsw245ptfmd"]
+[gd_scene load_steps=7 format=3 uid="uid://dhdsw245ptfmd"]
 
 [ext_resource type="Script" path="res://Prefabs/Car/Test/CarTest.cs" id="1_xwvox"]
 
@@ -7,6 +7,8 @@ size = Vector3(2, 0.4, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ppth1"]
 albedo_color = Color(1, 0.0588235, 0.109804, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_fmjux"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_mtq1n"]
 points = PackedVector3Array(-1, -0.2, -0.5, -1, 0.2, -0.5, 1, -0.2, -0.5, -1, -0.2, 0.5, -1, 0.2, 0.5, 1, 0.2, -0.5, 1, -0.2, 0.5, 1, 0.2, 0.5)
@@ -28,6 +30,11 @@ script = ExtResource("1_xwvox")
 [node name="Rectangle3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")
 surface_material_override/0 = SubResource("StandardMaterial3D_ppth1")
+
+[node name="Prism" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1.54491e-08, -0.498467, -6.98492e-10, 0.334664, -2.199e-08, -1.16415e-09, 1.39698e-09, 0, 0.509032, -1.23682, 0.00635188, 0.00241941)
+mesh = SubResource("PrismMesh_fmjux")
+skeleton = NodePath("../Wheels")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_mtq1n")
@@ -71,5 +78,13 @@ transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-
 target_position = Vector3(0, -20, 0)
 
 [node name="BackRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, -0.8, 0, 0)
+transform = Transform3D(1, 4.97039e-10, -6.98492e-10, 6.00267e-11, 1, -6.98492e-10, 0, 6.98492e-10, 1, -0.8, -1.41426e-10, 0)
+target_position = Vector3(0, -20, 0)
+
+[node name="LeftSideRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, 0.5)
+target_position = Vector3(0, -20, 0)
+
+[node name="RightSideRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, -0.5)
 target_position = Vector3(0, -20, 0)
