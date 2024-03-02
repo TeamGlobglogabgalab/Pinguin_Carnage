@@ -1,6 +1,8 @@
 using Godot;
 using System;
 
+namespace PinguinCarnage.Pefabs.Camera.CameraGTA;
+
 public partial class CameraGTA : Godot.Camera3D
 {
 	[Export]

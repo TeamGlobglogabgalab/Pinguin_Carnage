@@ -24,12 +24,6 @@ center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 angular_damp = 15.0
 script = ExtResource("1_xwvox")
-SuspensionLength = 0.6
-SuspensionForce = 180.0
-LinearMaxDamp = 2.0
-TiltRatio = 0.2
-MaxTorque = 360.0
-MaxTurningForce = 66.0
 
 [node name="Rectangle3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")

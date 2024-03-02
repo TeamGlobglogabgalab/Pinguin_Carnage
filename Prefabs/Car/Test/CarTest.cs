@@ -3,24 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 
+namespace PinguinCarnage.Pefabs.Car.Test;
+
 public partial class CarTest : RigidBody3D
 {
     [Export]
     public float DeadZone = 0.2f;
     [Export]
-    public float SuspensionLength = 0.8f;
+    public float SuspensionLength = 0.6f;
     [Export]
-    public float SuspensionForce = 50;
+    public float SuspensionForce = 180f;
     [Export]
-    public float LinearMaxDamp = 8;
+    public float LinearMaxDamp = 2f;
     [Export]
-    public float TiltRatio = 0.3f;
+    public float TiltRatio = 0.2f;
     [Export]
-    public float MaxTorque = 100f;
+    public float MaxTorque = 360f;
     [Export]
-    public float MaxTurningForce = 30f;
+    public float TurningForce = 66f;
 
-    public double CarSpeed;
+    public float ForwardSpeed => Math.Abs(LinearVelocity.Dot(Transform.Basis.X));
+    public float SideSpeed => LinearVelocity.Dot(Transform.Basis.Z);
 
     private bool OnRoad => _wheelsOnRoad == 4;
     private Dictionary<RayCast3D, MeshInstance3D> _wheels = new();
@@ -30,7 +33,7 @@ public partial class CarTest : RigidBody3D
     private Vector3 _previousPosition;
 
     public override void _Ready()
-	{
+    {
         new List<string>() { "BackLeft", "BackRight", "FrontLeft", "FrontRight" }
             .ForEach(str => _wheels.Add(
                 (RayCast3D)GetNode(str + "RayCast"),
@@ -40,11 +43,10 @@ public partial class CarTest : RigidBody3D
         _backRayCast = (RayCast3D)GetNode("BackRayCast");
 
         _previousPosition = this.GlobalPosition;
-        CarSpeed = 0;
     }
 
     public override void _Process(double delta)
-	{
+    {
     }
 
     public override void _PhysicsProcess(double delta)
@@ -61,14 +63,11 @@ public partial class CarTest : RigidBody3D
         }
 
         _wheelsOnRoad = 0;
-        foreach(var w in _wheels) HandleSuspension(w.Key, w.Value);
-
-        var currentPosition = this.GlobalPosition;
-        CarSpeed = _wheelsOnRoad == 0 ? 0 : currentPosition.DistanceTo(_previousPosition) / delta;
-        _previousPosition = currentPosition;
+        foreach (var w in _wheels) HandleSuspension(w.Key, w.Value);
+        CenterOfMass = new Vector3(0f, CenterOfMass.Y, 0f);
 
         Vector2 inputDirection = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp * Math.Max(1f, (float)CarSpeed / 10f) : 0f; // Math.Max(0f, LinearDamp - (float)delta * 10f);
+        LinearDamp = _wheelsOnRoad > 0 ? LinearMaxDamp * Math.Max(1f, ForwardSpeed / 10f) : 0f; // Math.Max(0f, LinearDamp - (float)delta * 10f);
         AngularDamp = _wheelsOnRoad > 0 ? 10f : 1f;
         if (_wheelsOnRoad == 0) return;
 
@@ -79,11 +78,17 @@ public partial class CarTest : RigidBody3D
         ApplyCentralForce(forwardVector * MaxTorque * forwardDirection);
         CenterOfMass = new Vector3(-forwardDirection * TiltRatio, CenterOfMass.Y, CenterOfMass.Z);
 
+        //Friction force
+        //if (Math.Abs(SideSpeed) < 5)
+        //    ApplyCentralForce(Transform.Basis.Z * -SideSpeed * Mass * 10);
+
         //Turning
+        if (ForwardSpeed < 1) return;
+        float turningForce = ForwardSpeed < 5 ? TurningForce * ForwardSpeed * 0.2f : TurningForce;
         float angle90Rad = 1.5708f;
         float sideDirection = Math.Abs(inputDirection.X) > DeadZone ?
             Math.Abs(inputDirection.X) / inputDirection.X * 1f : 0f;
-        ApplyTorque(new Vector3(0f, -sideDirection, 0f) * angle90Rad * MaxTurningForce);
+        ApplyTorque(new Vector3(0f, -sideDirection, 0f) * angle90Rad * turningForce);
         CenterOfMass = new Vector3(CenterOfMass.X, CenterOfMass.Y, sideDirection * TiltRatio / 2f);
     }
 
@@ -106,9 +111,8 @@ public partial class CarTest : RigidBody3D
         }
 
         float forceRatio = 1f - (distance / SuspensionLength);
-        //speed = 0;
         Vector3 direction = collisionPoint.DirectionTo(suspensionRayCast.GlobalPosition).Normalized();
-        ApplyForce(direction * forceRatio * SuspensionForce * Math.Max(1f, (float)CarSpeed / 5f), suspensionRayCast.GlobalPosition - GlobalPosition);
+        ApplyForce(direction * forceRatio * SuspensionForce * Math.Max(1f, ForwardSpeed / 5f), suspensionRayCast.GlobalPosition - GlobalPosition);
         wheelMesh.GlobalPosition = GetWheelPosition(distance, suspensionRayCast, wheelMesh);
         _wheelsOnRoad++;
     }
@@ -117,7 +121,7 @@ public partial class CarTest : RigidBody3D
     {
         float wheelRadius = ((CylinderMesh)wheelMesh.Mesh).TopRadius;
         var v = suspensionRayCast.GlobalPosition - (suspensionRayCast.Basis.Y.Normalized() * (suspensionLength - wheelRadius));
-        
+
         var c = suspensionRayCast.GetCollisionPoint();
         //var d = c.DirectionTo(suspensionRayCast.GlobalPosition).Normalized();
         v.Y = c.Y + wheelRadius;
@@ -126,7 +130,7 @@ public partial class CarTest : RigidBody3D
 
     private Vector3 GetForwardVector()
     {
-        if (!_frontRayCast.IsColliding() && !_backRayCast.IsColliding()) 
+        if (!_frontRayCast.IsColliding() && !_backRayCast.IsColliding())
             return Transform.Basis.X;
         return _backRayCast.GetCollisionPoint().DirectionTo(_frontRayCast.GetCollisionPoint());
     }

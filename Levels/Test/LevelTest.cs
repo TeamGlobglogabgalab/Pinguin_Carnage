@@ -1,5 +1,8 @@
 using Godot;
+using PinguinCarnage.Pefabs.Car.Test;
 using System;
+
+namespace PinguinCarnage.Levels.Test;
 
 public partial class LevelTest : Node3D
 {
@@ -14,6 +17,6 @@ public partial class LevelTest : Node3D
 
 	public override void _Process(double delta)
 	{
-		_labelSpeed.Text = "Speed : " + Math.Round(_car.CarSpeed, 2);
+		_labelSpeed.Text = "Speed : " + Math.Round(_car.ForwardSpeed, 2);
     }
 }
