@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dhdsw245ptfmd"]
+[gd_scene load_steps=11 format=3 uid="uid://dhdsw245ptfmd"]
 
 [ext_resource type="Script" path="res://Prefabs/Car/Test/CarTest.cs" id="1_xwvox"]
 
@@ -18,12 +18,37 @@ top_radius = 0.2
 bottom_radius = 0.2
 height = 0.15
 
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_q4qpg"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_24pej"]
+initial_velocity_min = 2.0
+initial_velocity_max = 5.0
+directional_velocity_min = 0.0
+directional_velocity_max = 4.0
+directional_velocity_curve = SubResource("CurveXYZTexture_q4qpg")
+gravity = Vector3(0, -20, 0)
+linear_accel_max = 38.1
+attractor_interaction_enabled = false
+scale_min = 0.1
+scale_max = 1.4
+turbulence_noise_scale = 5.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d3pbm"]
+diffuse_mode = 3
+albedo_color = Color(1, 0.992157, 0.992157, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_77jtt"]
+material = SubResource("StandardMaterial3D_d3pbm")
+radius = 0.15
+height = 0.3
+
 [node name="CarTest" type="RigidBody3D"]
 mass = 5.0
 gravity_scale = 3.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 script = ExtResource("1_xwvox")
+AirControlForce = 5.0
 
 [node name="Rectangle3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")
@@ -58,6 +83,24 @@ skeleton = NodePath("../..")
 transform = Transform3D(1, 0, -5.82531e-10, 5.91172e-11, -4.42378e-08, -1, 0, 1, -4.42378e-08, 0.9, 0, -0.7)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
+
+[node name="BackLeftParticleEmitter" type="GPUParticles3D" parent="Wheels"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.11621, -0.285108, 0.420952)
+emitting = false
+amount = 40
+lifetime = 0.3
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_24pej")
+draw_pass_1 = SubResource("SphereMesh_77jtt")
+
+[node name="BackRightParticleEmitter" type="GPUParticles3D" parent="Wheels"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.11621, -0.285108, -0.407117)
+emitting = false
+amount = 40
+lifetime = 0.3
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_24pej")
+draw_pass_1 = SubResource("SphereMesh_77jtt")
 
 [node name="FrontLeftRayCast" type="RayCast3D" parent="."]
 transform = Transform3D(0.999997, 9.54969e-10, -2.32831e-10, 9.79526e-10, 0.999998, -3.0268e-09, 3.0268e-09, 2.56114e-09, 0.999998, -0.9, 0, 0.45)

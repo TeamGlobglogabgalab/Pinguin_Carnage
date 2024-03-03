@@ -1,9 +1,11 @@
 using Godot;
 using PinguinCarnage.Constants;
 using PinguinCarnage.Extension;
+using PinguinCarnage.Prefabs.Car;
 using PinguinCarnage.Tools;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Metadata;
 using static Godot.Image;
 
@@ -53,29 +55,30 @@ public partial class CarTest : RigidBody3D
     private bool InTheAir => _wheelsOnRoad == 0;
     private bool OnRoad => _wheelsOnRoad > 0;
 
-    private Dictionary<RayCast3D, MeshInstance3D> _wheels = new();
+    private List<WheelComponent> _wheelsComponents = new();
     private RayCast3D _frontRayCast;
     private RayCast3D _backRayCast;
     private RayCast3D _leftSideRayCast;
     private RayCast3D _rightSideRayCast;
     private RayCast3D _middleRayCast;
-    private float _currentTorque = 0;
+    private float _currentTorque = 0f;
+    private float _currentFriction = 0f;
     private int _wheelsOnRoad = 0;
     private Vector3 _initialPosition;
 
     public override void _Ready()
     {
-        _wheels.Add((RayCast3D)GetNode("FrontLeftRayCast"), (MeshInstance3D)GetNode("Wheels/FrontLeftWheel"));
-        _wheels.Add((RayCast3D)GetNode("BackLeftRayCast"), (MeshInstance3D)GetNode("Wheels/BackLeftWheel"));
-        _wheels.Add((RayCast3D)GetNode("FrontRightRayCast"), (MeshInstance3D)GetNode("Wheels/FrontRightWheel"));
-        _wheels.Add((RayCast3D)GetNode("BackRightRayCast"), (MeshInstance3D)GetNode("Wheels/BackRightWheel"));
+        _wheelsComponents.Add(new WheelComponent(this, "FrontLeft"));
+        _wheelsComponents.Add(new WheelComponent(this, "FrontRight"));
+        _wheelsComponents.Add(new WheelComponent(this, "BackLeft"));
+        _wheelsComponents.Add(new WheelComponent(this, "BackRight"));
 
-        _frontRayCast = (RayCast3D)GetNode("FrontRayCast");
-        _backRayCast = (RayCast3D)GetNode("BackRayCast");
+        _frontRayCast = GetNode<RayCast3D>("FrontRayCast");
+        _backRayCast = GetNode<RayCast3D>("BackRayCast");
 
-        _leftSideRayCast = (RayCast3D)GetNode("LeftSideRayCast");
-        _rightSideRayCast = (RayCast3D)GetNode("RightSideRayCast");
-        _middleRayCast = (RayCast3D)GetNode("MiddleRayCast");
+        _leftSideRayCast = GetNode<RayCast3D>("LeftSideRayCast");
+        _rightSideRayCast = GetNode<RayCast3D>("RightSideRayCast");
+        _middleRayCast = GetNode<RayCast3D>("MiddleRayCast");
 
         _initialPosition = this.GlobalPosition;
     }
@@ -109,6 +112,7 @@ public partial class CarTest : RigidBody3D
         CalculateFloorNormal();
         DampTweaks(delta);
         HandleSuspensions(delta);
+        ShowParticleDust();
         if (InTheAir)
         {
             HandleAirControl();
@@ -119,13 +123,13 @@ public partial class CarTest : RigidBody3D
         HandleCornering();
         HandleJump();
         ApplyTiltTweak();
-        AddSideFrictionForce();
+        AddSideFrictionForce(delta);
         LimitTiltAngle(delta);
     }
 
     private void HandleInputs(double delta)
     {
-        //Space key
+        //Drift
         IsDrifting = OnRoad && Input.IsActionPressed("cmd_drift") &&
             Speed > 3f && Math.Abs(InputDirection.X) > 0f;
 
@@ -148,7 +152,7 @@ public partial class CarTest : RigidBody3D
         {
             //Slow the car quickly at low speed if not drifting or throttling
             if (Math.Abs(InputDirection.Y) == 0f && Speed < 3f && !IsDrifting)
-                LinearDamp = 20f;
+                LinearDamp = 10f;
             else
                 //Linear damp increase with speed
                 LinearDamp = LinearBaseDamp * Math.Max(1f, Speed / 10f);
@@ -162,12 +166,12 @@ public partial class CarTest : RigidBody3D
     private void HandleSuspensions(double delta)
     {
         _wheelsOnRoad = 0;
-        foreach (var w in _wheels) HandleSuspension(w.Key, w.Value, delta);
+        foreach (var w in _wheelsComponents) HandleSuspension(w.SuspensionRayCast, w.WheelMesh, delta);
     }
 
     private void HandleSuspension(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
     {
-        wheelMesh.GlobalPosition = GetWheelPosition(suspensionRayCast, wheelMesh, delta);//  suspensionRayCast.Position - (suspensionRayCast.Basis.Y.Normalized() * (SuspensionLength - wheelRadius));
+        wheelMesh.GlobalPosition = GetWheelGlobalPosition(suspensionRayCast, wheelMesh, delta);//  suspensionRayCast.Position - (suspensionRayCast.Basis.Y.Normalized() * (SuspensionLength - wheelRadius));
         if (!suspensionRayCast.IsColliding()) return;
 
         Vector3 collisionPoint = suspensionRayCast.GetCollisionPoint();
@@ -207,19 +211,23 @@ public partial class CarTest : RigidBody3D
     private void HandleJump()
     {
         if(Input.IsActionJustPressed(InputConstant.JUMP))
+        {
+            LinearDamp = 0f;
             ApplyCentralImpulse(Vector3.Up * JumpForce);
+        }
     }
 
-    private void AddSideFrictionForce()
+    private void AddSideFrictionForce(double delta)
     {
-        float friction = IsDrifting ? 0f : FrictionForce;
+        float frictionTarget = IsDrifting ? 0f : FrictionForce;
         //Increase friction at lower speed to limit slow drift
         if (Speed < 8f)
-            friction = !IsDrifting ? 
-                friction + (friction * (8f - Speed)) :
+            frictionTarget = !IsDrifting ?
+                frictionTarget + (frictionTarget * (8f - Speed)) :
                 FrictionForce * (8f - Speed) / 10f;
 
-        ApplyCentralForce(GetSideVector() * -SideSpeed * Mass * friction);
+        _currentFriction = Mathf.Lerp(_currentFriction, frictionTarget, (float)delta * 10f);
+        ApplyCentralForce(GetSideVector() * -SideSpeed * Mass * _currentFriction);
     }
 
     private void LimitTiltAngle(double delta)
@@ -232,6 +240,22 @@ public partial class CarTest : RigidBody3D
             float maxAngle = sign * TiltAngleMax - absoluteAngleDelta - 10f * sign;
             RotationDegrees = new Vector3(Mathf.Lerp(RotationDegrees.X, maxAngle, (float)delta * 15f),
                 RotationDegrees.Y, RotationDegrees.Z);
+        }
+    }
+
+    private void ShowParticleDust()
+    {
+        foreach(var w in _wheelsComponents.Where(w => w.ParticleEmitter is not null))
+        {
+            if (!IsDrifting || InTheAir || !w.SuspensionRayCast.IsColliding())
+            {
+                w.ParticleEmitter.Emitting = false;
+                continue;
+            }
+            Vector3 rayCastNormal = w.SuspensionRayCast.GlobalBasis.Column1.Normalized();
+            Vector3 particlePosition = w.WheelMesh.GlobalPosition - rayCastNormal * 0.1f + GetForwardVector() * 0.25f;
+            w.ParticleEmitter.GlobalPosition = particlePosition;
+            w.ParticleEmitter.Emitting = true;
         }
     }
 
@@ -255,7 +279,7 @@ public partial class CarTest : RigidBody3D
         CenterOfMass = new Vector3(-InputDirection.Y * tilt, CenterOfMass.Y, InputDirection.X * tilt / 2f);
     }
 
-    private Vector3 GetWheelPosition(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
+    private Vector3 GetWheelGlobalPosition(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
     {
         float wheelRadius = ((CylinderMesh)wheelMesh.Mesh).TopRadius;
         Vector3 rayCastNormal = suspensionRayCast.GlobalBasis.Column1.Normalized();
