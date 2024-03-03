@@ -40,7 +40,7 @@ public partial class CarTest : RigidBody3D
     [Export]
     public float FrictionForce = 15f;
     [Export]
-    public float JumpForce = 15f;
+    public float JumpForce = 80f;
 
     public float Speed => Math.Abs(SignedSpeed);
     public float SignedSpeed => LinearVelocity.Dot(Transform.Basis.X);
@@ -95,8 +95,8 @@ public partial class CarTest : RigidBody3D
 
     public override void _PhysicsProcess(double delta)
     {
-        //DEBUG JUMP
-        /*if (Input.IsActionJustPressed("ui_accept"))
+        //DEBUG JUMP (pour le fun)
+        if (Input.IsActionJustPressed("ui_accept"))
         {
             Random random = new Random();
             int randomNumber = random.Next(40) - 20;
@@ -104,7 +104,8 @@ public partial class CarTest : RigidBody3D
             ApplyForce(new Vector3(0, Mass * 666, 0));
             ApplyForce(new Vector3(0, Mass * 100, 0), GlobalPosition +
                 new Vector3((float)randomNumber / 20f, 0, (float)randomNumber2 / 20f));
-        }*/
+        }
+
         CalculateFloorNormal();
         DampTweaks(delta);
         HandleSuspensions(delta);
