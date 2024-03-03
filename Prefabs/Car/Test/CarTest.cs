@@ -45,6 +45,7 @@ public partial class CarTest : RigidBody3D
     public float JumpForce = 80f;
 
     public float Speed => Math.Abs(SignedSpeed);
+    public float CurrentTorque => _currentTorque;
     public float SignedSpeed => LinearVelocity.Dot(Transform.Basis.X);
     public float SideSpeed => LinearVelocity.Dot(GetSideVector());
     public Vector3 RelativeVectorUp => GlobalTransform.Basis.Y.Normalized();
@@ -245,17 +246,27 @@ public partial class CarTest : RigidBody3D
 
     private void ShowParticleDust()
     {
-        foreach(var w in _wheelsComponents.Where(w => w.ParticleEmitter is not null))
+        bool directionChange = Speed > 15f && InputDirection.X != 0f && InputDirection.Y != 0f &&
+            Mathf.Sign(SideSpeed) != -InputDirection.X && Math.Abs(SideSpeed) < 2f;
+        bool acceleration = Math.Abs(_currentTorque) < MaxTorque/2f && InputDirection.Y != 0f;
+        foreach (var w in _wheelsComponents.Where(w => w.ParticleEmitter is not null))
         {
-            if (!IsDrifting || InTheAir || !w.SuspensionRayCast.IsColliding())
+            if(!w.SuspensionRayCast.IsColliding() || InTheAir)
             {
                 w.ParticleEmitter.Emitting = false;
                 continue;
             }
-            Vector3 rayCastNormal = w.SuspensionRayCast.GlobalBasis.Column1.Normalized();
-            Vector3 particlePosition = w.WheelMesh.GlobalPosition - rayCastNormal * 0.1f + GetForwardVector() * 0.25f;
-            w.ParticleEmitter.GlobalPosition = particlePosition;
-            w.ParticleEmitter.Emitting = true;
+
+            float distance = w.SuspensionRayCast.GlobalPosition.DistanceTo(w.SuspensionRayCast.GetCollisionPoint());
+            if (IsDrifting || directionChange || acceleration || distance < 0.45f)
+            {
+                Vector3 rayCastNormal = w.SuspensionRayCast.GlobalBasis.Column1.Normalized();
+                Vector3 particlePosition = w.WheelMesh.GlobalPosition - rayCastNormal * 0.1f + GetForwardVector() * 0.25f;
+                w.ParticleEmitter.GlobalPosition = particlePosition;
+                w.ParticleEmitter.Emitting = true;
+            }
+            else
+                w.ParticleEmitter.Emitting = false;
         }
     }
 
