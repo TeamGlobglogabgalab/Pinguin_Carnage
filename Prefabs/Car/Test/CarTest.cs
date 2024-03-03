@@ -246,19 +246,23 @@ public partial class CarTest : RigidBody3D
 
     private void ShowParticleDust()
     {
-        bool directionChange = Speed > 15f && InputDirection.X != 0f && InputDirection.Y != 0f &&
+        bool directionChanging = Speed > 15f && InputDirection.X != 0f && InputDirection.Y != 0f &&
             Mathf.Sign(SideSpeed) != -InputDirection.X && Math.Abs(SideSpeed) < 2f;
-        bool acceleration = Math.Abs(_currentTorque) < MaxTorque/2f && InputDirection.Y != 0f;
+        bool torqueChange = Math.Abs(_currentTorque) < MaxTorque / 2f && InputDirection.Y != 0f;
+        bool accelerating = torqueChange && Mathf.Sign(_currentTorque) == InputDirection.Y;
+        bool braking = torqueChange && Mathf.Sign(_currentTorque) != InputDirection.Y;
         foreach (var w in _wheelsComponents.Where(w => w.ParticleEmitter is not null))
         {
-            if(!w.SuspensionRayCast.IsColliding() || InTheAir)
+            bool frontWheel = w.PositionString.ToUpper().StartsWith("FRONT");
+            bool backWheel = w.PositionString.ToUpper().StartsWith("BACK");
+            if (!w.SuspensionRayCast.IsColliding() || InTheAir)
             {
                 w.ParticleEmitter.Emitting = false;
                 continue;
             }
 
             float distance = w.SuspensionRayCast.GlobalPosition.DistanceTo(w.SuspensionRayCast.GetCollisionPoint());
-            if (IsDrifting || directionChange || acceleration || distance < 0.45f)
+            if (IsDrifting || (directionChanging && frontWheel) || (accelerating && backWheel) || braking || distance < 0.35f)
             {
                 Vector3 rayCastNormal = w.SuspensionRayCast.GlobalBasis.Column1.Normalized();
                 Vector3 particlePosition = w.WheelMesh.GlobalPosition - rayCastNormal * 0.1f + GetForwardVector() * 0.25f;

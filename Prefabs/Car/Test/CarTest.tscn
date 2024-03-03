@@ -84,10 +84,28 @@ transform = Transform3D(1, 0, -5.82531e-10, 5.91172e-11, -4.42378e-08, -1, 0, 1,
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
+[node name="FrontLeftParticleEmitter" type="GPUParticles3D" parent="Wheels"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.640024, -0.285108, 0.420952)
+emitting = false
+amount = 30
+lifetime = 0.3
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_24pej")
+draw_pass_1 = SubResource("SphereMesh_77jtt")
+
+[node name="FrontRightParticleEmitter" type="GPUParticles3D" parent="Wheels"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.640024, -0.285108, 0.420952)
+emitting = false
+amount = 30
+lifetime = 0.3
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_24pej")
+draw_pass_1 = SubResource("SphereMesh_77jtt")
+
 [node name="BackLeftParticleEmitter" type="GPUParticles3D" parent="Wheels"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.11621, -0.285108, 0.420952)
 emitting = false
-amount = 40
+amount = 30
 lifetime = 0.3
 fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_24pej")
@@ -96,7 +114,7 @@ draw_pass_1 = SubResource("SphereMesh_77jtt")
 [node name="BackRightParticleEmitter" type="GPUParticles3D" parent="Wheels"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.11621, -0.285108, -0.407117)
 emitting = false
-amount = 40
+amount = 30
 lifetime = 0.3
 fixed_fps = 60
 process_material = SubResource("ParticleProcessMaterial_24pej")

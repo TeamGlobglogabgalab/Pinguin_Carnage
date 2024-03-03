@@ -9,15 +9,17 @@ namespace PinguinCarnage.Prefabs.Car;
 
 public class WheelComponent
 {
-    public RayCast3D SuspensionRayCast { get; set; }
-    public MeshInstance3D WheelMesh { get; set; }
-    public GpuParticles3D ParticleEmitter { get; set; }
+    public string PositionString { get; private set; }
+    public RayCast3D SuspensionRayCast { get; private set; }
+    public MeshInstance3D WheelMesh { get; private set; }
+    public GpuParticles3D ParticleEmitter { get; private set; }
 
-    public WheelComponent(Node tree, string stringPosition)
+    public WheelComponent(Node tree, string positionString)
     {
-        SuspensionRayCast = tree.GetNode<RayCast3D>($"{stringPosition}RayCast");
-        WheelMesh = tree.GetNode<MeshInstance3D>($"Wheels/{stringPosition}Wheel");
-        if (tree.GetNodeOrNull($"Wheels/{stringPosition}ParticleEmitter") != null)
-            ParticleEmitter = tree.GetNode<GpuParticles3D>($"Wheels/{stringPosition}ParticleEmitter");
+        PositionString = positionString;
+        SuspensionRayCast = tree.GetNode<RayCast3D>($"{positionString}RayCast");
+        WheelMesh = tree.GetNode<MeshInstance3D>($"Wheels/{positionString}Wheel");
+        if (tree.GetNodeOrNull($"Wheels/{positionString}ParticleEmitter") != null)
+            ParticleEmitter = tree.GetNode<GpuParticles3D>($"Wheels/{positionString}ParticleEmitter");
     }
 }
