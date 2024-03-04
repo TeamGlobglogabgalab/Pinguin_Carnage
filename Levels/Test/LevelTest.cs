@@ -23,5 +23,6 @@ public partial class LevelTest : Node3D
 		_labelSpeed.Text += "Linear Damp : " + Math.Round(_car.LinearDamp, 2) + "\n";
 		_labelSpeed.Text += "Floor Normal : " + Math.Round(_car.FloorNormal.X, 2) + "  " + Math.Round(_car.FloorNormal.Y, 2) + "  " + Math.Round(_car.FloorNormal.Z, 2) + "\n";
         _labelSpeed.Text += "Rotation : " + Math.Round(_car.RotationDegrees.X, 2) + "  " + Math.Round(_car.RotationDegrees.Y, 2) + "  " + Math.Round(_car.RotationDegrees.Z, 2) + "\n";
+		_labelSpeed.Text += _car.GetSuspensionCompressions();
     }
 }

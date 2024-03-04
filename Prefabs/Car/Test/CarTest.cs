@@ -32,13 +32,13 @@ public partial class CarTest : RigidBody3D
     [Export]
     public float MaxTorque = 360f;
     [Export]
-    public float Acceleration = 2.5f;
+    public float Acceleration = 2f;
     [Export]
     public float TurningForceBase = 30f;
     [Export]
     public float TurningForceDrift = 80f;
     [Export]
-    public float AirControlForce = 10f;
+    public float AirControlForce = 5f;
     [Export]
     public float FrictionForce = 15f;
     [Export]
@@ -55,6 +55,7 @@ public partial class CarTest : RigidBody3D
     private Vector2 InputDirection => InputTools.GetDirections();
     private bool InTheAir => _wheelsOnRoad == 0;
     private bool OnRoad => _wheelsOnRoad > 0;
+    private bool AllWheelsOnRoad => _wheelsOnRoad == 4;
 
     private List<WheelComponent> _wheelsComponents = new();
     private RayCast3D _frontRayCast;
@@ -62,6 +63,8 @@ public partial class CarTest : RigidBody3D
     private RayCast3D _leftSideRayCast;
     private RayCast3D _rightSideRayCast;
     private RayCast3D _middleRayCast;
+    private float _accelerationSign = 0f;
+    private float _driftDirection = 0f;
     private float _currentTorque = 0f;
     private float _currentFriction = 0f;
     private int _wheelsOnRoad = 0;
@@ -128,15 +131,34 @@ public partial class CarTest : RigidBody3D
         LimitTiltAngle(delta);
     }
 
+    public string GetSuspensionCompressions()
+    {
+        string compressions = string.Empty;
+        foreach (var w in _wheelsComponents)
+            compressions += w.PositionString + " : " + w.CurrentDistanceToCollision.ToString() + "\n";
+        return compressions;
+    }
+
     private void HandleInputs(double delta)
     {
+        //TODO - Ameliorer les condition du code de drift
         //Drift
-        IsDrifting = OnRoad && Input.IsActionPressed("cmd_drift") &&
-            Speed > 3f && Math.Abs(InputDirection.X) > 0f;
+        if (IsDrifting && (InTheAir || Input.IsActionJustReleased(InputConstant.DRIFT) || Speed < 3f))
+        {
+            IsDrifting = false;
+            _driftDirection = 0f;
+        }
+        else if (!IsDrifting && OnRoad && Input.IsActionPressed(InputConstant.DRIFT) &&
+            InputDirection.X != 0f && Speed >= 3f)
+        {
+            IsDrifting = true;
+            _driftDirection = -InputDirection.X;
+        }
 
         //Throttle - Torque
-        float forwardDirection = InputDirection.Y;
-        _currentTorque = Mathf.Lerp(_currentTorque, MaxTorque * forwardDirection, Acceleration * (float)delta);
+        _accelerationSign = Input.IsActionPressed(InputConstant.ACCELERATE) ? 1f :
+            Input.IsActionPressed(InputConstant.BRAKE) ? -1f : 0f;
+        _currentTorque = Mathf.Lerp(_currentTorque, MaxTorque * _accelerationSign, Acceleration * (float)delta);
     }
 
     private void CalculateFloorNormal()
@@ -152,7 +174,7 @@ public partial class CarTest : RigidBody3D
         if(OnRoad)
         {
             //Slow the car quickly at low speed if not drifting or throttling
-            if (Math.Abs(InputDirection.Y) == 0f && Speed < 3f && !IsDrifting)
+            if (Math.Abs(_accelerationSign) == 0f && Speed < 3f && !IsDrifting)
                 LinearDamp = 10f;
             else
                 //Linear damp increase with speed
@@ -167,19 +189,21 @@ public partial class CarTest : RigidBody3D
     private void HandleSuspensions(double delta)
     {
         _wheelsOnRoad = 0;
-        foreach (var w in _wheelsComponents) HandleSuspension(w.SuspensionRayCast, w.WheelMesh, delta);
+        foreach (var w in _wheelsComponents) HandleSuspension(w, delta);
     }
 
-    private void HandleSuspension(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
+    private void HandleSuspension(WheelComponent wheel, double delta)
     {
+        RayCast3D suspensionRayCast = wheel.SuspensionRayCast;
+        MeshInstance3D wheelMesh = wheel.WheelMesh;
         wheelMesh.GlobalPosition = GetWheelGlobalPosition(suspensionRayCast, wheelMesh, delta);//  suspensionRayCast.Position - (suspensionRayCast.Basis.Y.Normalized() * (SuspensionLength - wheelRadius));
+        wheel.CurrentDistanceToCollision = GetSuspensionDistanceToCollision(suspensionRayCast);
         if (!suspensionRayCast.IsColliding()) return;
 
         Vector3 collisionPoint = suspensionRayCast.GetCollisionPoint();
-        float distance = suspensionRayCast.GlobalPosition.DistanceTo(collisionPoint);
-        if (distance > SuspensionLength) return;
+        if (wheel.CurrentDistanceToCollision > SuspensionLength) return;
 
-        float forceRatio = 1f - (distance / SuspensionLength);
+        float forceRatio = 1f - (wheel.CurrentDistanceToCollision / SuspensionLength);
         Vector3 direction = collisionPoint.DirectionTo(suspensionRayCast.GlobalPosition).Normalized();
         ApplyForce(direction * forceRatio * SuspensionForce * Math.Max(1f, Speed / 5f), suspensionRayCast.GlobalPosition - GlobalPosition);
         _wheelsOnRoad++;
@@ -206,7 +230,17 @@ public partial class CarTest : RigidBody3D
         float turningForce = IsDrifting ? TurningForceDrift : TurningForceBase;
         turningForce = Speed < 8f ? turningForce * Speed * 0.125f : turningForce;
         int sign = SignedSpeed > 0f ? 1 : -1;
-        ApplyTorque(new Vector3(0f, InputDirection.X * sign, 0f) * Mathf.DegToRad(90) * turningForce);
+        float cornerDirection = IsDrifting ? _driftDirection : -InputDirection.X;
+        ApplyTorque(new Vector3(0f, cornerDirection * sign, 0f) * Mathf.DegToRad(90) * turningForce);
+
+        //Counter torque when drifting
+        if (IsDrifting)
+        {
+            float driftCounterRatio = (Math.Abs(_driftDirection + InputDirection.X) / 2f); //0-1
+            float counterTurningForce = turningForce * driftCounterRatio * 1.25f;
+            counterTurningForce *= Math.Abs(SideSpeed) / 15f;
+            ApplyTorque(new Vector3(0f, cornerDirection * -sign, 0f) * Mathf.DegToRad(85) * counterTurningForce);
+        }
     }
 
     private void HandleJump()
@@ -246,26 +280,29 @@ public partial class CarTest : RigidBody3D
 
     private void ShowParticleDust()
     {
-        bool directionChanging = Speed > 15f && InputDirection.X != 0f && InputDirection.Y != 0f &&
+        bool directionChanging = Speed > 15f && InputDirection.X != 0f && _accelerationSign != 0f &&
             Mathf.Sign(SideSpeed) != -InputDirection.X && Math.Abs(SideSpeed) < 2f;
-        bool torqueChange = Math.Abs(_currentTorque) < MaxTorque / 2f && InputDirection.Y != 0f;
-        bool accelerating = torqueChange && Mathf.Sign(_currentTorque) == InputDirection.Y;
-        bool braking = torqueChange && Mathf.Sign(_currentTorque) != InputDirection.Y;
+        bool torqueChange = Math.Abs(_currentTorque) < MaxTorque / 2f && _accelerationSign != 0f;
+        bool accelerating = torqueChange && Mathf.Sign(_currentTorque) == _accelerationSign;
+        bool braking = torqueChange && Mathf.Sign(_currentTorque) != _accelerationSign;
+
         foreach (var w in _wheelsComponents.Where(w => w.ParticleEmitter is not null))
         {
-            bool frontWheel = w.PositionString.ToUpper().StartsWith("FRONT");
-            bool backWheel = w.PositionString.ToUpper().StartsWith("BACK");
             if (!w.SuspensionRayCast.IsColliding() || InTheAir)
             {
                 w.ParticleEmitter.Emitting = false;
                 continue;
             }
 
-            float distance = w.SuspensionRayCast.GlobalPosition.DistanceTo(w.SuspensionRayCast.GetCollisionPoint());
-            if (IsDrifting || (directionChanging && frontWheel) || (accelerating && backWheel) || braking || distance < 0.35f)
+            bool frontWheel = w.Position == WheelComponent.WheelPosition.Front;
+            bool backWheel = w.Position == WheelComponent.WheelPosition.Back;
+            bool suspensionCrushed = w.CurrentDistanceToCollision < 0.45f;
+            if (IsDrifting || (directionChanging && frontWheel) || (accelerating && backWheel) || braking || suspensionCrushed)
             {
+                float wheelRadius = GetWheelRadius(w.WheelMesh);
                 Vector3 rayCastNormal = w.SuspensionRayCast.GlobalBasis.Column1.Normalized();
-                Vector3 particlePosition = w.WheelMesh.GlobalPosition - rayCastNormal * 0.1f + GetForwardVector() * 0.25f;
+                Vector3 particlePosition = w.WheelMesh.GlobalPosition - rayCastNormal * 
+                    wheelRadius/2f + GetForwardVector() * -wheelRadius;
                 w.ParticleEmitter.GlobalPosition = particlePosition;
                 w.ParticleEmitter.Emitting = true;
             }
@@ -278,25 +315,25 @@ public partial class CarTest : RigidBody3D
     {
         if (!_frontRayCast.IsColliding() && !_backRayCast.IsColliding())
             return Vector3.Zero;
-        return _frontRayCast.GetCollisionPoint().DirectionTo(_backRayCast.GetCollisionPoint());
+        return _backRayCast.GetCollisionPoint().DirectionTo(_frontRayCast.GetCollisionPoint());
     }
 
     private Vector3 GetSideVector()
     {
         if (!_leftSideRayCast.IsColliding() && !_rightSideRayCast.IsColliding())
             return Vector3.Zero;
-        return _leftSideRayCast.GetCollisionPoint().DirectionTo(_rightSideRayCast.GetCollisionPoint());
+        return _rightSideRayCast.GetCollisionPoint().DirectionTo(_leftSideRayCast.GetCollisionPoint());
     }
 
     private void ApplyTiltTweak()
     {
         float tilt = Speed < 8 ? TiltRatio * Speed * 0.125f : TiltRatio;
-        CenterOfMass = new Vector3(-InputDirection.Y * tilt, CenterOfMass.Y, InputDirection.X * tilt / 2f);
+        CenterOfMass = new Vector3(-_accelerationSign * tilt, CenterOfMass.Y, -InputDirection.X * tilt / 2f);
     }
 
     private Vector3 GetWheelGlobalPosition(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
     {
-        float wheelRadius = ((CylinderMesh)wheelMesh.Mesh).TopRadius;
+        float wheelRadius = GetWheelRadius(wheelMesh);
         Vector3 rayCastNormal = suspensionRayCast.GlobalBasis.Column1.Normalized();
         //Vector3 rayCastNormal = suspensionRayCast.Basis.Y.Normalized();;
 
@@ -322,5 +359,18 @@ public partial class CarTest : RigidBody3D
             target = suspensionRayCast.GlobalPosition - rayCastNormal * (SuspensionLength - wheelRadius);
 
         return GodotMath.Lerp(wheelMesh.GlobalPosition, target, (float)delta * 20f);
+    }
+
+    private float GetSuspensionDistanceToCollision(RayCast3D suspensionRayCast)
+    {
+        if (!suspensionRayCast.IsColliding())
+            return SuspensionLength;
+        return suspensionRayCast.GlobalPosition.DistanceTo(suspensionRayCast.GetCollisionPoint());
+    }
+
+    private float GetWheelRadius(MeshInstance3D wheelMesh)
+    {
+        if (wheelMesh?.Mesh is not CylinderMesh) return 0f;
+        return ((CylinderMesh)wheelMesh.Mesh).TopRadius;
     }
 }

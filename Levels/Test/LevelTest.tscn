@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://bjgxuq2d3kr01"]
+[gd_scene load_steps=20 format=3 uid="uid://bjgxuq2d3kr01"]
 
 [ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://Prefabs/Car/Test/CarTest.tscn" id="1_inwan"]
 [ext_resource type="Script" path="res://Levels/Test/LevelTest.cs" id="1_kwxwf"]
@@ -44,11 +44,16 @@ points = PackedVector3Array(30, -4, 100, -1.90735e-06, 4, 100, -30, -4, 100, 30,
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_jrnox"]
 points = PackedVector3Array(30, -4, 100, -1.90735e-06, 4, 100, -30, -4, 100, 30, -4, -100, -1.90735e-06, 4, -100, -30, -4, -100)
 
+[sub_resource type="LabelSettings" id="LabelSettings_2iw14"]
+font_color = Color(1, 1, 0, 1)
+outline_size = 3
+outline_color = Color(0, 0, 0, 1)
+
 [node name="LevelTest" type="Node3D"]
 script = ExtResource("1_kwxwf")
 
 [node name="CameraGTA" parent="." node_paths=PackedStringArray("ObjectToFollow") instance=ExtResource("2_wcwql")]
-transform = Transform3D(-1.4775e-08, -0.406497, 0.913652, -1.93468e-09, 0.913652, 0.406497, -1, 4.23837e-09, -1.42857e-08, 3.48463, 2.92011, 0.0858268)
+transform = Transform3D(1.02198e-07, 0.406497, -0.913652, -1.93468e-09, 0.913652, 0.406497, 1, -3.97755e-08, 9.41597e-08, -3.51537, 2.92011, 0.0858268)
 ObjectToFollow = NodePath("../CarTest")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -140,3 +145,4 @@ offset_left = 14.0
 offset_top = 10.0
 offset_right = 233.0
 offset_bottom = 91.0
+label_settings = SubResource("LabelSettings_2iw14")
