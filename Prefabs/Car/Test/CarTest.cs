@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
-using static Godot.Image;
 
 namespace PinguinCarnage.Pefabs.Car.Test;
 
@@ -37,6 +36,8 @@ public partial class CarTest : RigidBody3D
     public float TurningForceBase = 30f;
     [Export]
     public float TurningForceDrift = 80f;
+    [Export]
+    public float CounterForceDrift = 80f;
     [Export]
     public float AirControlForce = 5f;
     [Export]
@@ -123,7 +124,7 @@ public partial class CarTest : RigidBody3D
             return;
         }
 
-        HandleThrottling();
+        HandleAcceleration();
         HandleCornering();
         HandleJump();
         ApplyTiltTweak();
@@ -218,7 +219,7 @@ public partial class CarTest : RigidBody3D
         ApplyTorque(frontRotation * InputDirection.Y * AirControlForce);
     }
 
-    private void HandleThrottling()
+    private void HandleAcceleration()
     {
         //Throttle
         Vector3 forwardVector = GetForwardVector().Normalized();
@@ -236,6 +237,7 @@ public partial class CarTest : RigidBody3D
         //Counter torque when drifting
         if (IsDrifting)
         {
+            turningForce = Speed < 8f ? CounterForceDrift * Speed * 0.125f : CounterForceDrift;
             float driftCounterRatio = (Math.Abs(_driftDirection + InputDirection.X) / 2f); //0-1
             float counterTurningForce = turningForce * driftCounterRatio * 1.25f;
             counterTurningForce *= Math.Abs(SideSpeed) / 15f;
@@ -328,7 +330,8 @@ public partial class CarTest : RigidBody3D
     private void ApplyTiltTweak()
     {
         float tilt = Speed < 8 ? TiltRatio * Speed * 0.125f : TiltRatio;
-        CenterOfMass = new Vector3(-_accelerationSign * tilt, CenterOfMass.Y, -InputDirection.X * tilt / 2f);
+        float tiltX = IsDrifting ? _driftDirection : -InputDirection.X;
+        CenterOfMass = new Vector3(-_accelerationSign * tilt, CenterOfMass.Y, tiltX * tilt / 2f);
     }
 
     private Vector3 GetWheelGlobalPosition(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
