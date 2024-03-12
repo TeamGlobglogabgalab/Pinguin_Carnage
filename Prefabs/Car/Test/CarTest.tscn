@@ -3,20 +3,22 @@
 [ext_resource type="Script" path="res://Prefabs/Car/Test/CarTest.cs" id="1_xwvox"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_kkump"]
-size = Vector3(2, 0.4, 1)
+size = Vector3(1, 0.4, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ppth1"]
 albedo_color = Color(1, 0.0588235, 0.109804, 1)
 
-[sub_resource type="PrismMesh" id="PrismMesh_fmjux"]
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ajb76"]
+points = PackedVector3Array(0.5, 0.2, 1, 0.5, -0.2, 1, 0.5, 0.2, -1, -0.5, 0.2, 1, -0.5, -0.2, 1, 0.5, -0.2, -1, -0.5, 0.2, -1, -0.5, -0.2, -1)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_mtq1n"]
-points = PackedVector3Array(-1, -0.2, -0.5, -1, 0.2, -0.5, 1, -0.2, -0.5, -1, -0.2, 0.5, -1, 0.2, 0.5, 1, 0.2, -0.5, 1, -0.2, 0.5, 1, 0.2, 0.5)
+[sub_resource type="PrismMesh" id="PrismMesh_fmjux"]
+size = Vector3(0.8, 0.5, 0.2)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_8iokf"]
 top_radius = 0.2
 bottom_radius = 0.2
 height = 0.15
+radial_segments = 16
 
 [sub_resource type="CurveXYZTexture" id="CurveXYZTexture_q4qpg"]
 
@@ -49,42 +51,42 @@ center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
 script = ExtResource("1_xwvox")
 
-[node name="Rectangle3D" type="MeshInstance3D" parent="."]
+[node name="MainMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")
 surface_material_override/0 = SubResource("StandardMaterial3D_ppth1")
 
-[node name="Prism" type="MeshInstance3D" parent="."]
-transform = Transform3D(-1.46286e-08, 0.498467, 0, -0.334664, -2.17887e-08, 0, 0, 0, 0.509032, 1.23226, 0, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConvexPolygonShape3D_ajb76")
+
+[node name="DebugArrow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -1.25)
 mesh = SubResource("PrismMesh_fmjux")
 skeleton = NodePath("../Wheels")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("ConvexPolygonShape3D_mtq1n")
 
 [node name="Wheels" type="Node3D" parent="."]
 
 [node name="FrontLeftWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(1, 0, -5.82531e-10, 5.91172e-11, -4.42378e-08, -1, 0, 1, -4.42378e-08, 0.9, 0, -0.7)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -0.65, 0, -0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="FrontRightWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(1, 0, -5.83896e-10, 6.00267e-11, -4.47035e-08, -1, 0, 1, -4.47035e-08, 0.9, 0, 0.7)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.65, 0, -0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="BackLeftWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(1, 0, -5.76165e-10, 5.24778e-10, -4.47035e-08, -0.999999, 0, 1, -4.47035e-08, -0.9, 0, -0.7)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 0.999999, -0.65, 0, 0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="BackRightWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(1, 0, -1.10958e-10, 6.00267e-11, -4.47035e-08, -0.999999, 0, 1, -4.47035e-08, -0.9, 0, 0.7)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 0.999999, 0.65, 0, 0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="FrontLeftParticleEmitter" type="GPUParticles3D" parent="Wheels"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.681, -0.285, -0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.650844, -0.285, -0.607353)
 emitting = false
 amount = 30
 lifetime = 0.3
@@ -92,7 +94,7 @@ process_material = SubResource("ParticleProcessMaterial_24pej")
 draw_pass_1 = SubResource("SphereMesh_77jtt")
 
 [node name="FrontRightParticleEmitter" type="GPUParticles3D" parent="Wheels"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.681, -0.285, 0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.657074, -0.285, -0.62879)
 emitting = false
 amount = 30
 lifetime = 0.3
@@ -100,7 +102,7 @@ process_material = SubResource("ParticleProcessMaterial_24pej")
 draw_pass_1 = SubResource("SphereMesh_77jtt")
 
 [node name="BackLeftParticleEmitter" type="GPUParticles3D" parent="Wheels"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.075, -0.285, -0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.644344, -0.285, 1.18705)
 emitting = false
 amount = 30
 lifetime = 0.3
@@ -108,7 +110,7 @@ process_material = SubResource("ParticleProcessMaterial_24pej")
 draw_pass_1 = SubResource("SphereMesh_77jtt")
 
 [node name="BackRightParticleEmitter" type="GPUParticles3D" parent="Wheels"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.075, -0.285, 0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.663575, -0.285, 1.18156)
 emitting = false
 amount = 30
 lifetime = 0.3
@@ -116,31 +118,31 @@ process_material = SubResource("ParticleProcessMaterial_24pej")
 draw_pass_1 = SubResource("SphereMesh_77jtt")
 
 [node name="FrontLeftRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(0.999998, 2.50111e-11, 0, 5.12955e-10, 0.999999, -4.65661e-10, 4.65661e-10, 0, 0.999999, 0.9, 0, -0.45)
+transform = Transform3D(0.999998, 2.50111e-11, 0, 5.12955e-10, 0.999999, -4.65661e-10, 4.65661e-10, 0, 0.999999, -0.45, 0, -0.9)
 
 [node name="FrontRightRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(0.999997, 2.31921e-11, 0, 3.81988e-11, 0.999999, -6.98492e-10, 2.32831e-10, 2.32831e-10, 0.999999, 0.9, 0, 0.45)
+transform = Transform3D(0.999997, 2.31921e-11, 0, 3.81988e-11, 0.999999, -6.98492e-10, 2.32831e-10, 2.32831e-10, 0.999999, 0.45, 0, -0.9)
 
 [node name="BackLeftRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(0.999998, 2.50111e-11, 0, 5.12955e-10, 0.999999, -4.65661e-10, 4.65661e-10, 0, 0.999999, -0.9, 0, -0.45)
+transform = Transform3D(0.999998, 2.50111e-11, 0, 5.12955e-10, 0.999999, -4.65661e-10, 4.65661e-10, 0, 0.999999, -0.45, 0, 0.9)
 
 [node name="BackRightRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(0.999997, 9.54969e-10, -2.32831e-10, 9.79526e-10, 0.999998, -3.0268e-09, 3.0268e-09, 2.56114e-09, 0.999998, -0.9, 0, 0.45)
+transform = Transform3D(0.999997, 9.54969e-10, -2.32831e-10, 9.79526e-10, 0.999998, -3.0268e-09, 3.0268e-09, 2.56114e-09, 0.999998, 0.45, 0, 0.9)
 
 [node name="FrontRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0.8, 0, 0)
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, -0.9)
 target_position = Vector3(0, -2, 0)
 
 [node name="BackRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 4.97039e-10, -6.98492e-10, 6.00267e-11, 1, -6.98492e-10, 0, 6.98492e-10, 1, -0.8, -1.41426e-10, 0)
+transform = Transform3D(1, 4.97039e-10, -6.98492e-10, 6.00267e-11, 1, -6.98492e-10, 0, 6.98492e-10, 1, 0, 0, 0.9)
 target_position = Vector3(0, -2, 0)
 
 [node name="LeftSideRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, -0.5)
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, -0.5, 0, 0)
 target_position = Vector3(0, -20, 0)
 
 [node name="RightSideRayCast" type="RayCast3D" parent="."]
-transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, 0.5)
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0.5, 0, 0)
 target_position = Vector3(0, -20, 0)
 
 [node name="MiddleRayCast" type="RayCast3D" parent="."]

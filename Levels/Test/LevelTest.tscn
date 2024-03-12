@@ -53,7 +53,7 @@ outline_color = Color(0, 0, 0, 1)
 script = ExtResource("1_kwxwf")
 
 [node name="CameraGTA" parent="." node_paths=PackedStringArray("ObjectToFollow") instance=ExtResource("2_wcwql")]
-transform = Transform3D(1.02198e-07, 0.406497, -0.913652, -1.93468e-09, 0.913652, 0.406497, 1, -3.97755e-08, 9.41597e-08, -3.51537, 2.92011, 0.0858268)
+transform = Transform3D(1, -5.75441e-08, 1.34097e-07, -1.93468e-09, 0.913652, 0.406497, -1.45909e-07, -0.406497, 0.913652, -0.0385318, 2.92011, 3.27682)
 ObjectToFollow = NodePath("../CarTest")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -84,7 +84,7 @@ shape = SubResource("BoxShape3D_gplow")
 transform = Transform3D(0.999988, -0.00455151, -0.0019583, 0.00454413, 0.999983, -0.00375339, 0.00197536, 0.00374445, 0.999991, 0, 2.242, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Jump"]
-transform = Transform3D(-0.595925, 0.0102661, 0.802974, 0.00423808, 0.999944, -0.00963915, -0.803027, -0.00234114, -0.595936, 0.0186589, -0.598813, 10.9198)
+transform = Transform3D(-0.595925, 0.0102661, 0.802974, 0.00423808, 0.999944, -0.00963915, -0.803027, -0.00234114, -0.595936, -3.34398, -0.681195, -15.0995)
 mesh = SubResource("PrismMesh_2m83u")
 surface_material_override/0 = SubResource("StandardMaterial3D_oaiyk")
 

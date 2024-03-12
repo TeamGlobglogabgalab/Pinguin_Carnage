@@ -47,7 +47,7 @@ public partial class CarTest : RigidBody3D
 
     public float Speed => Math.Abs(SignedSpeed);
     public float CurrentTorque => _currentTorque;
-    public float SignedSpeed => LinearVelocity.Dot(Transform.Basis.X);
+    public float SignedSpeed => LinearVelocity.Dot(-Transform.Basis.Z);
     public float SideSpeed => LinearVelocity.Dot(GetSideVector());
     public Vector3 RelativeVectorUp => GlobalTransform.Basis.Y.Normalized();
     public bool IsDrifting { get; private set; } = false;
@@ -142,8 +142,8 @@ public partial class CarTest : RigidBody3D
 
     private void HandleInputs(double delta)
     {
-        //TODO - Ameliorer les condition du code de drift
         //Drift
+        //TODO - Ameliorer ce code
         if (IsDrifting && (InTheAir || Input.IsActionJustReleased(InputConstant.DRIFT) || Speed < 3f))
         {
             IsDrifting = false;
@@ -273,10 +273,10 @@ public partial class CarTest : RigidBody3D
         float absoluteAngleDelta = Mathf.RadToDeg(GetSideVector().SignedAngleTo(Vector3.Up, GetForwardVector())) - 90f;
         if (OnRoad && IsDrifting && angleRelativeToSlop > TiltAngleMax)
         {
-            int sign = Mathf.Sign(RotationDegrees.X);
-            float maxAngle = sign * TiltAngleMax - absoluteAngleDelta - 10f * sign;
-            RotationDegrees = new Vector3(Mathf.Lerp(RotationDegrees.X, maxAngle, (float)delta * 15f),
-                RotationDegrees.Y, RotationDegrees.Z);
+            int sign = Mathf.Sign(RotationDegrees.Z);
+            float maxAngle = sign * TiltAngleMax + absoluteAngleDelta - 5f;
+            RotationDegrees = new Vector3(RotationDegrees.X, RotationDegrees.Y,
+                Mathf.Lerp(RotationDegrees.Z, maxAngle, (float)delta * 10f));
         }
     }
 
@@ -331,7 +331,7 @@ public partial class CarTest : RigidBody3D
     {
         float tilt = Speed < 8 ? TiltRatio * Speed * 0.125f : TiltRatio;
         float tiltX = IsDrifting ? _driftDirection : -InputDirection.X;
-        CenterOfMass = new Vector3(-_accelerationSign * tilt, CenterOfMass.Y, tiltX * tilt / 2f);
+        CenterOfMass = new Vector3(tiltX * tilt / 2f, CenterOfMass.Y, _accelerationSign * tilt);
     }
 
     private Vector3 GetWheelGlobalPosition(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
