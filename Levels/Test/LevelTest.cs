@@ -1,17 +1,17 @@
 using Godot;
-using PinguinCarnage.Pefabs.Car.Test;
+using PinguinCarnage.Pefabs.Vehicles;
 using System;
 
 namespace PinguinCarnage.Levels.Test;
 
 public partial class LevelTest : Node3D
 {
-	private CarTest _car;
+	private VehicleBase _car;
 	private Label _labelSpeed;
 
     public override void _Ready()
 	{
-		_car = GetNode("CarTest") as CarTest;
+		_car = GetNode("VehicleBase") as VehicleBase;
         _labelSpeed = GetNode("Label") as Label;
     }
 

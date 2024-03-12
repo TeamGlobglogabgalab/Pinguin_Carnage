@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 
-namespace PinguinCarnage.Pefabs.Car.Test;
+namespace PinguinCarnage.Pefabs.Vehicles;
 
-public partial class CarTest : RigidBody3D
+public partial class VehicleBase : RigidBody3D
 {
     [Export]
     public float SuspensionLength = 0.6f;

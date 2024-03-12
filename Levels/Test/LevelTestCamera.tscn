@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://bbqa36v4lxkct"]
 
 [ext_resource type="Texture2D" uid="uid://ddga2xusb7tft" path="res://Textures/grid_black_512x512.png" id="1_1yygj"]
-[ext_resource type="PackedScene" uid="uid://bmuivykagycbr" path="res://Prefabs/Camera/CameraMouse/CameraMouse.tscn" id="1_ibm1x"]
+[ext_resource type="PackedScene" uid="uid://bmuivykagycbr" path="res://Prefabs/Camera/CameraTPS/CameraTPS.tscn" id="1_ibm1x"]
 [ext_resource type="PackedScene" uid="uid://dhdsw245ptfmd" path="res://Prefabs/Car/Test/CarTest.tscn" id="2_1q5wd"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yh4qt"]
@@ -17,9 +17,8 @@ size = Vector3(100, 1, 100)
 
 [node name="Sandbox" type="Node3D"]
 
-[node name="CameraMouse" parent="." node_paths=PackedStringArray("_objectToFollow") instance=ExtResource("1_ibm1x")]
+[node name="CameraMouse" parent="." instance=ExtResource("1_ibm1x")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3, 8)
-_objectToFollow = NodePath("../CarTest")
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)

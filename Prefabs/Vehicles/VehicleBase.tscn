@@ -1,6 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://dhdsw245ptfmd"]
+[gd_scene load_steps=11 format=3 uid="uid://bdpkdwrvh36d5"]
 
-[ext_resource type="Script" path="res://Prefabs/Car/Test/CarTest.cs" id="1_xwvox"]
+[ext_resource type="Script" path="res://Prefabs/Vehicles/VehicleBase.cs" id="1_38oip"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_kkump"]
 size = Vector3(1, 0.4, 2)
@@ -44,12 +44,12 @@ material = SubResource("StandardMaterial3D_d3pbm")
 radius = 0.15
 height = 0.3
 
-[node name="CarTest" type="RigidBody3D"]
+[node name="VehicleBase" type="RigidBody3D"]
 mass = 5.0
 gravity_scale = 3.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
-script = ExtResource("1_xwvox")
+script = ExtResource("1_38oip")
 
 [node name="MainMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")
