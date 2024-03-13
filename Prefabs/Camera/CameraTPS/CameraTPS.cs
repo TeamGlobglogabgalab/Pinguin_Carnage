@@ -1,6 +1,8 @@
 using Godot;
 using System;
 
+namespace PinguinCarnage.Prefabs.Camera.CameraTPS;
+
 public partial class CameraTPS : Node3D
 {
     private Node3D _camera;

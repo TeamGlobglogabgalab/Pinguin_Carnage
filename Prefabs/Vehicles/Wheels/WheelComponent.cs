@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PinguinCarnage.Prefabs.Car;
+namespace PinguinCarnage.Prefabs.Vehicles.Wheels;
 
 public class WheelComponent
 {
@@ -39,5 +39,10 @@ public class WheelComponent
         WheelMesh = tree.GetNode<MeshInstance3D>($"Wheels/{positionString}Wheel");
         if (tree.GetNodeOrNull($"Wheels/{positionString}ParticleEmitter") != null)
             ParticleEmitter = tree.GetNode<GpuParticles3D>($"Wheels/{positionString}ParticleEmitter");
+    }
+
+    public static implicit operator Variant(WheelComponent component)
+    {
+        return new Variant();
     }
 }

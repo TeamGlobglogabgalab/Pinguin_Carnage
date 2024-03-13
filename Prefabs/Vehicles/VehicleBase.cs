@@ -1,33 +1,24 @@
 using Godot;
+using Godot.Collections;
 using PinguinCarnage.Constants;
 using PinguinCarnage.Extension;
-using PinguinCarnage.Prefabs.Car;
+using PinguinCarnage.Prefabs.Vehicles.Wheels;
 using PinguinCarnage.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
+using System.Reflection;
 
-namespace PinguinCarnage.Pefabs.Vehicles;
+namespace PinguinCarnage.Prefabs.Vehicles;
 
+[Tool]
 public partial class VehicleBase : RigidBody3D
 {
+    [ExportGroup("Physics")]
     [Export]
     public float SuspensionLength = 0.6f;
     [Export]
-    public float WheelGap = 0f;
-    [Export]
     public float SuspensionForce = 180f;
-    [Export]
-    public float LinearBaseDamp = 2f;
-    [Export]
-    public float AngularBaseDamp = 9f;
-    [Export]
-    public float AngularAirDamp = 3f;
-    [Export]
-    public float TiltAngleMax = 50f;
-    [Export]
-    public float TiltRatio = 0.4f;
     [Export]
     public float MaxTorque = 360f;
     [Export]
@@ -44,6 +35,18 @@ public partial class VehicleBase : RigidBody3D
     public float FrictionForce = 15f;
     [Export]
     public float JumpForce = 80f;
+
+    [ExportGroup("Tweaks")]
+    [Export]
+    public float LinearBaseDamp = 2f;
+    [Export]
+    public float AngularBaseDamp = 9f;
+    [Export]
+    public float AngularAirDamp = 3f;
+    [Export]
+    public float TiltAngleMax = 50f;
+    [Export]
+    public float TiltRatio = 0.4f;
 
     public float Speed => Math.Abs(SignedSpeed);
     public float CurrentTorque => _currentTorque;
@@ -88,8 +91,23 @@ public partial class VehicleBase : RigidBody3D
         _initialPosition = this.GlobalPosition;
     }
 
+    public override void _EnterTree()
+    {
+        UpdateConfigurationWarnings();
+    }
+
+    public override string[] _GetConfigurationWarnings()
+    {
+        if (!NodeTools.GetNodesOfType<WheelBase>(this).Any())
+            return new string[] { "Vehicle has no wheels !\n" +
+                "You should add atleast one scene that is attached to WheelBase.cs script." };
+        return System.Array.Empty<string>();
+    }
+
     public override void _Process(double delta)
     {
+        if (Engine.IsEditorHint()) return;
+
         //DEBUG - Reset
         if (Input.IsActionJustPressed("cmd_reset")) //R key
         {
@@ -103,6 +121,8 @@ public partial class VehicleBase : RigidBody3D
 
     public override void _PhysicsProcess(double delta)
     {
+        if (Engine.IsEditorHint()) return;
+
         //DEBUG JUMP (pour le fun)
         if (Input.IsActionJustPressed("ui_accept"))
         {
@@ -337,16 +357,17 @@ public partial class VehicleBase : RigidBody3D
     private Vector3 GetWheelGlobalPosition(RayCast3D suspensionRayCast, MeshInstance3D wheelMesh, double delta)
     {
         float wheelRadius = GetWheelRadius(wheelMesh);
-        Vector3 rayCastNormal = suspensionRayCast.GlobalBasis.Column1.Normalized();
-        //Vector3 rayCastNormal = suspensionRayCast.Basis.Y.Normalized();;
+        Vector3 rayCastNormal = suspensionRayCast.GlobalBasis.Y.Normalized();
+        //Vector3 rayCastNormal = suspensionRayCast.Basis.Y.Normalized();
 
+        
         Vector3 rayOrigin = suspensionRayCast.GlobalPosition;
         Vector3 rayEnd = rayOrigin + new Vector3(0, -SuspensionLength, 0);
         var result = GetWorld3D().DirectSpaceState.IntersectRay(new PhysicsRayQueryParameters3D()
         {
             CollideWithBodies = true,
             CollideWithAreas = false,
-            Exclude = new Godot.Collections.Array<Rid>(new List<Rid>() { GetRid() }), // Exclude self
+            Exclude = new Godot.Collections.Array<Rid>(new List<Rid>() { this.GetRid() }), // Exclude self
             From = rayOrigin,
             To = rayEnd
         });

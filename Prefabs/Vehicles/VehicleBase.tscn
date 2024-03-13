@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://bdpkdwrvh36d5"]
+[gd_scene load_steps=12 format=3 uid="uid://bdpkdwrvh36d5"]
 
 [ext_resource type="Script" path="res://Prefabs/Vehicles/VehicleBase.cs" id="1_38oip"]
+[ext_resource type="PackedScene" uid="uid://bjgms5qt6ks32" path="res://Prefabs/Vehicles/Wheels/WheelTest.tscn" id="3_f242x"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_kkump"]
 size = Vector3(1, 0.4, 2)
@@ -8,11 +9,11 @@ size = Vector3(1, 0.4, 2)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ppth1"]
 albedo_color = Color(1, 0.0588235, 0.109804, 1)
 
-[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ajb76"]
-points = PackedVector3Array(0.5, 0.2, 1, 0.5, -0.2, 1, 0.5, 0.2, -1, -0.5, 0.2, 1, -0.5, -0.2, 1, 0.5, -0.2, -1, -0.5, 0.2, -1, -0.5, -0.2, -1)
-
 [sub_resource type="PrismMesh" id="PrismMesh_fmjux"]
 size = Vector3(0.8, 0.5, 0.2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ajb76"]
+points = PackedVector3Array(0.5, 0.2, 1, 0.5, -0.2, 1, 0.5, 0.2, -1, -0.5, 0.2, 1, -0.5, -0.2, 1, 0.5, -0.2, -1, -0.5, 0.2, -1, -0.5, -0.2, -1)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_8iokf"]
 top_radius = 0.2
@@ -49,39 +50,40 @@ mass = 5.0
 gravity_scale = 3.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.2, 0)
+angular_damp = 3.0
 script = ExtResource("1_38oip")
 
 [node name="MainMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_kkump")
 surface_material_override/0 = SubResource("StandardMaterial3D_ppth1")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("ConvexPolygonShape3D_ajb76")
-
 [node name="DebugArrow" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -1.25)
 mesh = SubResource("PrismMesh_fmjux")
 skeleton = NodePath("../Wheels")
 
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConvexPolygonShape3D_ajb76")
+
 [node name="Wheels" type="Node3D" parent="."]
 
 [node name="FrontLeftWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -0.65, 0, -0.9)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -0.45, -0.4, -0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="FrontRightWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.65, 0, -0.9)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.45, -0.4, -0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="BackLeftWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 0.999999, -0.65, 0, 0.9)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 0.999999, -0.45, -0.4, 0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
 [node name="BackRightWheel" type="MeshInstance3D" parent="Wheels"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 0.999999, 0.65, 0, 0.9)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 0.999999, 0.45, -0.4, 0.9)
 mesh = SubResource("CylinderMesh_8iokf")
 skeleton = NodePath("../..")
 
@@ -116,6 +118,8 @@ amount = 30
 lifetime = 0.3
 process_material = SubResource("ParticleProcessMaterial_24pej")
 draw_pass_1 = SubResource("SphereMesh_77jtt")
+
+[node name="WheelTest" parent="Wheels" instance=ExtResource("3_f242x")]
 
 [node name="FrontLeftRayCast" type="RayCast3D" parent="."]
 transform = Transform3D(0.999998, 2.50111e-11, 0, 5.12955e-10, 0.999999, -4.65661e-10, 4.65661e-10, 0, 0.999999, -0.45, 0, -0.9)

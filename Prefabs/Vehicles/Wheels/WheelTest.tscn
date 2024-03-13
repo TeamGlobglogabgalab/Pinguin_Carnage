@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bjgms5qt6ks32"]
+
+[ext_resource type="Script" path="res://Prefabs/Vehicles/Wheels/WheelBase.cs" id="1_w4yp8"]
+
+[node name="WheelTest" type="Node3D"]
+script = ExtResource("1_w4yp8")

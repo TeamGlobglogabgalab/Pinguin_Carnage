@@ -1,13 +1,14 @@
 using Godot;
 using PinguinCarnage.Extension;
+using PinguinCarnage.Prefabs.Vehicles;
 using System;
 
-namespace PinguinCarnage.Pefabs.Camera.CameraGTA;
+namespace PinguinCarnage.Prefabs.Camera.CameraGTA;
 
 public partial class CameraGTA : Godot.Camera3D
 {
 	[Export]
-	public Node3D ObjectToFollow;
+	public VehicleBase ObjectToFollow;
 
 	private Vector3 TargetPosition => ObjectToFollow.GlobalPosition;
 	private float _baseDistance;

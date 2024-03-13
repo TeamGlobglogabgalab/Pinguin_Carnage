@@ -1,5 +1,5 @@
 using Godot;
-using PinguinCarnage.Pefabs.Vehicles;
+using PinguinCarnage.Prefabs.Vehicles;
 using System;
 
 namespace PinguinCarnage.Levels.Test;
