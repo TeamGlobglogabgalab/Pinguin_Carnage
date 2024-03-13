@@ -1,0 +1,77 @@
+[gd_scene load_steps=8 format=3 uid="uid://bmrtbxnlahlv7"]
+
+[ext_resource type="Script" path="res://Prefabs/Vehicles/VehicleBase.cs" id="1_n0dwj"]
+[ext_resource type="PackedScene" uid="uid://dlbepv4l7yevt" path="res://Prefabs/Vehicles/Wheels/WheelBigTest.tscn" id="2_7g3fx"]
+[ext_resource type="PackedScene" uid="uid://dh02ck8nun6hq" path="res://Prefabs/Vehicles/Wheels/WheelTest.tscn" id="3_si5xo"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_kkump"]
+size = Vector3(1, 0.4, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ppth1"]
+albedo_color = Color(1, 0.0588235, 0.109804, 1)
+
+[sub_resource type="PrismMesh" id="PrismMesh_fmjux"]
+size = Vector3(0.8, 0.5, 0.2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ajb76"]
+points = PackedVector3Array(0.5, 0.2, 1, 0.5, -0.2, 1, 0.5, 0.2, -1, -0.5, 0.2, 1, -0.5, -0.2, 1, 0.5, -0.2, -1, -0.5, 0.2, -1, -0.5, -0.2, -1)
+
+[node name="VehicleTest" type="RigidBody3D"]
+mass = 5.0
+gravity_scale = 3.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.2, 0)
+angular_damp = 3.0
+script = ExtResource("1_n0dwj")
+
+[node name="MainMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_kkump")
+surface_material_override/0 = SubResource("StandardMaterial3D_ppth1")
+
+[node name="DebugArrow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -1.25)
+mesh = SubResource("PrismMesh_fmjux")
+skeleton = NodePath("")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConvexPolygonShape3D_ajb76")
+
+[node name="FrontLeftWheel" parent="." instance=ExtResource("2_7g3fx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.45, 0, -0.9)
+SuspensionLength = 1.4
+SuspensionForce = 100.0
+SteeringWheel = true
+
+[node name="FrontRightWheel" parent="." instance=ExtResource("2_7g3fx")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0, -0.9)
+SuspensionLength = 1.2
+SuspensionForce = 100.0
+SteeringWheel = true
+
+[node name="BackLeftWheel" parent="." instance=ExtResource("3_si5xo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.45, 0, 0.9)
+DriveWheel = true
+
+[node name="BackRightWheel" parent="." instance=ExtResource("3_si5xo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0, 0.9)
+DriveWheel = true
+
+[node name="FrontRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, -0.9)
+target_position = Vector3(0, -2, 0)
+
+[node name="BackRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.97039e-10, -6.98492e-10, 6.00267e-11, 1, -6.98492e-10, 0, 6.98492e-10, 1, 0, 0, 0.9)
+target_position = Vector3(0, -2, 0)
+
+[node name="LeftSideRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, -0.5, 0, 0)
+target_position = Vector3(0, -20, 0)
+
+[node name="RightSideRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0.5, 0, 0)
+target_position = Vector3(0, -20, 0)
+
+[node name="MiddleRayCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 4.96129e-10, -4.65661e-10, 5.91172e-11, 1, -4.65661e-10, 0, 4.65661e-10, 1, 0, 0, 0)
+target_position = Vector3(0, -20, 0)

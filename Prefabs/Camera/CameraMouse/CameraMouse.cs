@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace PinguinCarnage.Pefabs.Camera.CameraMouse;
+namespace PinguinCarnage.Prefabs.Camera.CameraMouse;
 
 public partial class CameraMouse : Camera3D
 {

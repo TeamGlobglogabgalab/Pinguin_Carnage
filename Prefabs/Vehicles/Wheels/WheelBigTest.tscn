@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://dlbepv4l7yevt"]
+
+[ext_resource type="Script" path="res://Prefabs/Vehicles/Wheels/WheelBase.cs" id="1_uqsbt"]
+[ext_resource type="PackedScene" uid="uid://ditu8260h4ffn" path="res://Prefabs/Particles/BubbleDustParticles.tscn" id="2_d8y7m"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_uvqwl"]
+height = 0.15
+radial_segments = 16
+
+[node name="WheelTest" type="Node3D" node_paths=PackedStringArray("WheelMesh", "ParticleEmitter")]
+script = ExtResource("1_uqsbt")
+WheelRadius = 0.5
+WheelMesh = NodePath("WheelMesh")
+ParticleEmitter = NodePath("BubbleDustParticles")
+
+[node name="BubbleDustParticles" parent="." instance=ExtResource("2_d8y7m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="WheelMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, -4.37114e-08, 0, -4.37114e-08, -1, -1, -4.37114e-08, 1.91069e-15, 0, 0, 0)
+mesh = SubResource("CylinderMesh_uvqwl")
+skeleton = NodePath("../BubbleDustParticles")

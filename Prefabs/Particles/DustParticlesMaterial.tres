@@ -1,0 +1,16 @@
+[gd_resource type="ParticleProcessMaterial" load_steps=2 format=3 uid="uid://2dj3h6b3dgbo"]
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_q4qpg"]
+
+[resource]
+initial_velocity_min = 2.0
+initial_velocity_max = 5.0
+directional_velocity_min = 0.0
+directional_velocity_max = 4.0
+directional_velocity_curve = SubResource("CurveXYZTexture_q4qpg")
+gravity = Vector3(0, -20, 0)
+linear_accel_max = 38.1
+attractor_interaction_enabled = false
+scale_min = 0.1
+scale_max = 1.2
+turbulence_noise_scale = 5.0
