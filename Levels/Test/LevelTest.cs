@@ -11,7 +11,7 @@ public partial class LevelTest : Node3D
 
     public override void _Ready()
 	{
-		_car = GetNode("VehicleBase") as VehicleBase;
+		_car = GetNode("VehicleTest") as VehicleBase;
         _labelSpeed = GetNode("Label") as Label;
     }
 

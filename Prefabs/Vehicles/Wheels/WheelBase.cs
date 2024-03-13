@@ -7,11 +7,17 @@ namespace PinguinCarnage.Prefabs.Vehicles.Wheels;
 public partial class WheelBase : Node3D
 {
     [Export]
-    public float WheelRadius;
+    public float SuspensionLength = 0.6f;
     [Export]
-    public bool SteeringWheel;
+    public float SuspensionForce = 180f;
     [Export]
-    public bool DriveWheel;
+    public float WheelRadius = 0.2f;
     [Export]
-    public bool ShowParticles = true;
+    public bool SteeringWheel = false;
+    [Export]
+    public bool DriveWheel = false;
+    [Export]
+    public Node3D WheelMesh;
+    [Export]
+    public GpuParticles3D ParticleEmitter;
 }
