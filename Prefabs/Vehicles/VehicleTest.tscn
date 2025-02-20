@@ -1,7 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://bmrtbxnlahlv7"]
+[gd_scene load_steps=7 format=3 uid="uid://bmrtbxnlahlv7"]
 
 [ext_resource type="Script" path="res://Prefabs/Vehicles/VehicleBase.cs" id="1_n0dwj"]
-[ext_resource type="PackedScene" uid="uid://dlbepv4l7yevt" path="res://Prefabs/Vehicles/Wheels/WheelBigTest.tscn" id="2_7g3fx"]
 [ext_resource type="PackedScene" uid="uid://dh02ck8nun6hq" path="res://Prefabs/Vehicles/Wheels/WheelTest.tscn" id="3_si5xo"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_kkump"]
@@ -36,16 +35,12 @@ skeleton = NodePath("")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_ajb76")
 
-[node name="FrontLeftWheel" parent="." instance=ExtResource("2_7g3fx")]
+[node name="FrontLeftWheel" parent="." instance=ExtResource("3_si5xo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.45, 0, -0.9)
-SuspensionLength = 1.4
-SuspensionForce = 100.0
 SteeringWheel = true
 
-[node name="FrontRightWheel" parent="." instance=ExtResource("2_7g3fx")]
+[node name="FrontRightWheel" parent="." instance=ExtResource("3_si5xo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0, -0.9)
-SuspensionLength = 1.2
-SuspensionForce = 100.0
 SteeringWheel = true
 
 [node name="BackLeftWheel" parent="." instance=ExtResource("3_si5xo")]
